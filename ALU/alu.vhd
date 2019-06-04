@@ -15,7 +15,7 @@ end entity;
 
 architecture alu of alu is
 begin	
-	process(clk)
+	process(clk, enable)
 	begin	
 		if(rising_edge(clk) and enable) then
 			case op_code is

@@ -2,12 +2,24 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library lldevcpu;
-use lldevcpu.lldevcpu_pack.all;
+use work.lldevcpu_pack.all;
 
-entity lldevcpu is end;
+entity lldevcpu is
+	port(clk: in std_logic; sclk, rclk, dio: out std_logic := '0');
+end entity lldevcpu;
 
 architecture lldevcpu_arch of lldevcpu is
+	signal sec_s: std_logic := '0';
+	
+	component clk_divider is
+		generic (delay_cnt: integer); 
+		port(clk: in std_logic; out_s: out std_logic := '0');
+	end component;
+
+	component display is
+		port(clk: in std_logic; display_data: in std_logic_vector(3 downto 0); sclk, rclk, dio: out std_logic);
+	end component;
+
 	type pipeline_status is (loading, running);
 	type execution_states is (decode, exec, write_back);
 	type regfile is array(0 to 15) of unsigned32;
@@ -35,11 +47,8 @@ architecture lldevcpu_arch of lldevcpu is
 			result: out unsigned32);
 	end component;
 	
-	signal reg_file_s: regfile := (X"00000000", X"00000005", X"0000000F", X"00000004", X"00000000", X"0000000A", X"00000000", X"00000000",
+	signal reg_file_s: regfile := (X"00000000", X"00000005", X"00000004", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
-											
-	
-	signal clk: std_logic := '0';
 	
 	-- Сигналы ROM
 	signal rom_data_s: rom_data := X"00000000";
@@ -60,31 +69,35 @@ architecture lldevcpu_arch of lldevcpu is
 	signal pipeline_status_s: pipeline_status;
 	signal cur_exec_state_s: execution_states;
 begin
-	clk <= not clk after 5 ns;
+	sec_delay: clk_divider 
+				generic map(25_000_000)	
+				port map(clk, sec_s);
+				
+	display1: display port map(clk, std_logic_vector(reg_file_s(0)(3 downto 0)), sclk, rclk, dio);		
 
 	rom1: rom port map(std_logic_vector(reg_file_s(pc_reg_addr)(rom_addr_msb_num downto 0)),
-						clk,
+						sec_s,
 						rom_data_s);
 				
-	instr_decoder1: instr_decoder port map(clk,
+	instr_decoder1: instr_decoder port map(sec_s,
 											instruction_s,
 											opcode_s,
 											dest_reg_addr_s,
 											src_reg_addr_s);
 											
 	alu1: alu port map(alu_enable_s,
-						clk,
+						sec_s,
 						opcode_s,
 						alu_dest_val_s,
 						alu_src_val_s,
 						alu_result_s);
 	
-	exec_proc: process(clk)
+	exec_proc: process(sec_s)
 		variable next_pc_value: unsigned32 := X"00000000";
 		variable alu_enable_v: boolean;
 		variable need_write_back_v: boolean;
 	begin
-		if(falling_edge(clk)) then
+		if(falling_edge(sec_s)) then
 			alu_enable_v := false;
 		
 			case pipeline_status_s is
@@ -94,7 +107,12 @@ begin
 					case cur_exec_state_s is
 						when decode =>
 							next_pc_value := reg_file_s(pc_reg_addr);
-							next_pc_value := next_pc_value + 1;
+							
+							-- Ограничиваю количество инструкций
+							if(next_pc_value < 5) then
+								next_pc_value := next_pc_value + 1;
+							end if;	
+								
 							reg_file_s(pc_reg_addr) <= next_pc_value;
 							
 							instruction_s <= rom_data_s;

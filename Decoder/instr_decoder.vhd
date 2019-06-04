@@ -2,7 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
--- lldevcpu — название библиотеки, созданной мной в ModelSim
 library lldevcpu;
 use lldevcpu.lldevcpu_pack.all;
 
@@ -27,7 +26,6 @@ begin
 			src_reg_addr_v := 0;
 			dest_reg_addr_v := 0;
 					
-			-- Добавил преобразование из std_logic_vector(3 downto 0) в integer
 			case opcode_bin_s is
 				when "000001" =>
 					instr_opcode <= add;
