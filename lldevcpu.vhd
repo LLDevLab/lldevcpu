@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 use work.lldevcpu_pack.all;
 
 entity lldevcpu is
-	port(clk: in std_logic; sclk, rclk, dio: out std_logic := '0');
+	port(clk: in std_logic; bit_out: out std_logic := '1'; led_blink: out std_logic := '1');
 end entity lldevcpu;
 
 architecture lldevcpu_arch of lldevcpu is
@@ -16,8 +16,8 @@ architecture lldevcpu_arch of lldevcpu is
 		port(clk: in std_logic; out_s: out std_logic := '0');
 	end component;
 
-	component display is
-		port(clk: in std_logic; display_data: in std_logic_vector(3 downto 0); sclk, rclk, dio: out std_logic);
+	component uat is		-- universal asynchronous transmitter
+		port(clk: in std_logic; enable: in boolean; data: in std_logic_vector(0 to 7); bit_out: out std_logic; ready: buffer boolean);
 	end component;
 
 	type pipeline_status is (loading, running);
@@ -50,30 +50,41 @@ architecture lldevcpu_arch of lldevcpu is
 	signal reg_file_s: regfile := (X"00000000", X"00000005", X"00000004", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
 	
-	-- Сигналы ROM
+	-- ROM signals
 	signal rom_data_s: rom_data := X"00000000";
 	
-	-- Сигналы декодера
+	-- Decoder signals
 	signal instruction_s: rom_data := X"00000000";
 	signal opcode_s: opcode;
 	signal dest_reg_addr_s: reg_addr := 0;
 	signal src_reg_addr_s: reg_addr := 0;
 	
-	-- Сигналы АЛУ
+	-- ALU signals
 	signal alu_enable_s: boolean;
 	signal alu_result_s: unsigned32 := X"00000000";
 	signal alu_dest_val_s: unsigned32 := X"00000000";
 	signal alu_src_val_s: unsigned32 := X"00000000";
 	
-	-- Управляющие сигналы
+	-- Control signals
 	signal pipeline_status_s: pipeline_status;
 	signal cur_exec_state_s: execution_states;
+	
+	-- UART signals 
+	signal clk_uart: std_logic := '0';
+	signal uart_enable_s: boolean;
+	signal uart_ready_s: boolean;
+	signal bit_out_s: std_logic;
 begin
 	sec_delay: clk_divider 
 				generic map(25_000_000)	
 				port map(clk, sec_s);
 				
-	display1: display port map(clk, std_logic_vector(reg_file_s(0)(3 downto 0)), sclk, rclk, dio);		
+	uart_delay: clk_divider
+				generic map(2_604)	
+				port map(clk, clk_uart);
+				
+	uart_transmit: uat
+				port map(clk_uart, uart_enable_s, std_logic_vector(reg_file_s(0)(7 downto 0)), bit_out_s, uart_ready_s);	
 
 	rom1: rom port map(std_logic_vector(reg_file_s(pc_reg_addr)(rom_addr_msb_num downto 0)),
 						sec_s,
@@ -91,6 +102,22 @@ begin
 						alu_dest_val_s,
 						alu_src_val_s,
 						alu_result_s);
+						
+	led_blink <= bit_out_s;
+	bit_out <= bit_out_s;
+	
+	uart_process: process(clk_uart, reg_file_s(0), uart_ready_s)
+		variable tmp_reg_val: unsigned32 := reg_file_s(0);
+	begin
+		if(falling_edge(clk_uart)) then
+			if(tmp_reg_val = reg_file_s(0)) then
+				uart_enable_s <= false;
+			else
+				uart_enable_s <= uart_ready_s;
+			end if;
+			tmp_reg_val := reg_file_s(0);
+		end if;
+	end process uart_process;
 	
 	exec_proc: process(sec_s)
 		variable next_pc_value: unsigned32 := X"00000000";
@@ -108,7 +135,7 @@ begin
 						when decode =>
 							next_pc_value := reg_file_s(pc_reg_addr);
 							
-							-- Ограничиваю количество инструкций
+							-- Limit executing instructions to 5
 							if(next_pc_value < 5) then
 								next_pc_value := next_pc_value + 1;
 							end if;	
@@ -131,6 +158,7 @@ begin
 							end if;
 							
 							cur_exec_state_s <= decode;
+							
 						when others =>
 							null;
 					end case;
