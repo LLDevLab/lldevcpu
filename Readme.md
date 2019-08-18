@@ -25,13 +25,13 @@ CPU have 2 stage pipeline:
 ### Add instruction
 
 - Opcode: 000001
-- Binary representation: Bits 31 – 26 are operation code (opcode) bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
-- Description: Adds value source register's value to destination register's value and puts the result to destination register.
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
+- Description: Adds source register's value to destination register's value and puts the result to destination register.
 - Example: add r0, r1
 
 ### Sub instruction
 
 - Opcode: 000010
-- Binary representation: Bits 31 – 26 are operation code (opcode) bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Subtracts source register's value from destination register's value and puts the result to destination register.
 - Example: sub r0, r1
