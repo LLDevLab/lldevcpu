@@ -1,4 +1,4 @@
-# lldevcpu processor
+# lldevcpu SoPC
 
 ## About project
 
