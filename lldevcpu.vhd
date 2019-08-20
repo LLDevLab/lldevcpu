@@ -9,6 +9,7 @@ entity lldevcpu is
 end entity lldevcpu;
 
 architecture lldevcpu_arch of lldevcpu is
+
 	signal sec_s: std_logic := '0';
 	
 	component clk_divider is
@@ -23,7 +24,6 @@ architecture lldevcpu_arch of lldevcpu is
 	type pipeline_status is (loading, running);
 	type execution_states is (decode, exec, write_back);
 	type regfile is array(0 to 15) of unsigned32;
-	constant pc_reg_addr: integer := 15;
 
 	component rom is
 		port(address: in rom_addr; 
@@ -50,31 +50,49 @@ architecture lldevcpu_arch of lldevcpu is
 	signal reg_file_s: regfile := (X"00000000", X"00000005", X"00000004", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
 	
-	-- ROM signals
+	-- ROM control signals
 	signal rom_data_s: rom_data := X"00000000";
 	
-	-- Decoder signals
+	-- Decoder control signals
 	signal instruction_s: rom_data := X"00000000";
 	signal opcode_s: opcode;
 	signal dest_reg_addr_s: reg_addr := 0;
 	signal src_reg_addr_s: reg_addr := 0;
 	
-	-- ALU signals
+	-- ALU control signals
 	signal alu_enable_s: boolean;
 	signal alu_result_s: unsigned32 := X"00000000";
 	signal alu_dest_val_s: unsigned32 := X"00000000";
 	signal alu_src_val_s: unsigned32 := X"00000000";
 	
-	-- Control signals
+	-- CPU control signals
 	signal pipeline_status_s: pipeline_status;
 	signal cur_exec_state_s: execution_states;
 	
-	-- UART signals 
+	-- UART control signals 
 	signal clk_uart: std_logic := '0';
 	signal uart_enable_s: boolean;
 	signal uart_ready_s: boolean;
 	signal bit_out_s: std_logic;
+	
+	function need_writeback(op_code: opcode) return boolean is
+	begin
+		return (op_code = add or 
+				op_code = sub);
+	end function;
+	
+	function is_branch(op_code: opcode) return boolean is
+	begin
+		return (op_code = br);
+	end function;
+	
+	function is_arithmetic(op_code: opcode) return boolean is
+	begin
+		return (op_code = add or 
+				op_code = sub);
+	end function;
 begin
+
 	sec_delay: clk_divider 
 				generic map(25_000_000)	
 				port map(clk, sec_s);
@@ -145,10 +163,14 @@ begin
 							instruction_s <= rom_data_s;
 							cur_exec_state_s <= exec;
 						when exec =>
-							need_write_back_v := opcode_s = add or opcode_s = sub;
-						
-							alu_dest_val_s <= reg_file_s(dest_reg_addr_s);
-							alu_src_val_s <= reg_file_s(src_reg_addr_s);
+							need_write_back_v := need_writeback(opcode_s);
+							
+							if(is_arithmetic(opcode_s)) then							
+								alu_dest_val_s <= reg_file_s(dest_reg_addr_s);
+								alu_src_val_s <= reg_file_s(src_reg_addr_s);
+							elsif(is_branch(opcode_s)) then
+								reg_file_s(pc_reg_addr) <= reg_file_s(src_reg_addr_s);
+							end if;
 							
 							alu_enable_v := true;
 							cur_exec_state_s <= write_back;

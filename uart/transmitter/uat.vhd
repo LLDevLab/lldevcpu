@@ -24,7 +24,7 @@ architecture uat_arch of uat is
 		return ret;
 	end function;
 begin
-	process(clk, enable)
+	process(clk, enable, ready)
 		variable ready_v: boolean := true;
 		variable clk_cnt: integer range 0 to max_cnt := 0;
 		variable parity_bit: std_logic := '0';
