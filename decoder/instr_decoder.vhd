@@ -1,9 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-
-library lldevcpu_br;
-use lldevcpu.lldevcpu_pack.all;
+use work.lldevcpu_pack.all;
 
 entity instr_decoder is
 	port(clk: in std_logic; 

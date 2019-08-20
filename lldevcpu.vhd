@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 use work.lldevcpu_pack.all;
 
 entity lldevcpu is
-	port(clk: in std_logic; bit_out: out std_logic := '1'; led_blink: out std_logic := '1');
+	port(clk: in std_logic; bit_out: out std_logic := '1');
 end entity lldevcpu;
 
 architecture lldevcpu_arch of lldevcpu is
@@ -47,7 +47,7 @@ architecture lldevcpu_arch of lldevcpu is
 			result: out unsigned32);
 	end component;
 	
-	signal reg_file_s: regfile := (X"00000000", X"00000005", X"00000004", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
+	signal reg_file_s: regfile := (X"00000000", X"00000005", X"00000001", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
 	
 	-- ROM control signals
@@ -121,7 +121,6 @@ begin
 						alu_src_val_s,
 						alu_result_s);
 						
-	led_blink <= bit_out_s;
 	bit_out <= bit_out_s;
 	
 	uart_process: process(clk_uart, reg_file_s(0), uart_ready_s)
