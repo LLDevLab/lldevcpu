@@ -25,7 +25,7 @@ CPU have 2 stage pipeline:
 - Bit 31 - Carry flag
 	- Indicates a carry in an operation.
 - Bit 30 - Zero flag 
-	- Indicate whether or not operation result is negative. If result of operation is equal to 0, than flag is set, otherwise flag is clear.
+	- Indicate whether or not operation result is zero. If result of operation is equal to 0, than flag is set, otherwise flag is clear.
 - Bit 29 - Negative flag 
 	- Indicate whether or not operation result is negative. Flag is set if MSB of the result is set, otherwise flag is clear.
 
@@ -37,6 +37,7 @@ CPU have 2 stage pipeline:
 - Binary representation: Bits 31 – 26 are operation code (opcode), other bits values are ignored.
 - Description: This instruction doesn't do anything.
 - Example: noop
+- Status flags affected: clears all status flags
 
 ### Add instruction
 
@@ -44,6 +45,7 @@ CPU have 2 stage pipeline:
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Adds source register's value to destination register's value and puts the result to destination register.
 - Example: add r0, r1
+- Status flags affected: Can affect carry, zero and negative flags
 
 ### Sub instruction
 
@@ -51,6 +53,7 @@ CPU have 2 stage pipeline:
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Subtracts source register's value from destination register's value and puts the result to destination register.
 - Example: sub r0, r1
+- Status flags affected: Can affect carry, zero and negative flags
 
 ### Unconditional branch instruction
 
@@ -58,6 +61,7 @@ CPU have 2 stage pipeline:
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. In this register actual branch address is stored. Bits 21 – 0 are reserved.
 - Description: Moves branch address from source register to Program Counter register.
 - Example: br r0 
+- Status flags affected: does not change status register flags.
 
 ## Related software
 
