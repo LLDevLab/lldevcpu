@@ -4,6 +4,7 @@ use ieee.numeric_std.all;
 
 package lldevcpu_pack is
 	constant pc_reg_addr: integer := 15;
+	constant status_reg_addr: integer := 13;
 	constant rom_addr_msb_num: integer := 11;
 
 	type opcode is (noop, add, sub, br);

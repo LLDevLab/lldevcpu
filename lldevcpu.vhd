@@ -44,7 +44,8 @@ architecture lldevcpu_arch of lldevcpu is
 			clk: in std_logic; 
 			op_code: in opcode; 
 			dest_data, src_data: in unsigned32; 
-			result: out unsigned32);
+			result: out unsigned32;
+			sreg: out unsigned32);
 	end component;
 	
 	signal reg_file_s: regfile := (X"00000000", X"00000005", X"00000001", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
@@ -64,6 +65,7 @@ architecture lldevcpu_arch of lldevcpu is
 	signal alu_result_s: unsigned32 := X"00000000";
 	signal alu_dest_val_s: unsigned32 := X"00000000";
 	signal alu_src_val_s: unsigned32 := X"00000000";
+	signal alu_sreg_val_s: unsigned32 := X"00000000";
 	
 	-- CPU control signals
 	signal pipeline_status_s: pipeline_status;
@@ -119,7 +121,8 @@ begin
 						opcode_s,
 						alu_dest_val_s,
 						alu_src_val_s,
-						alu_result_s);
+						alu_result_s,
+						alu_sreg_val_s);
 						
 	bit_out <= bit_out_s;
 	
@@ -178,6 +181,7 @@ begin
 								reg_file_s(dest_reg_addr_s) <= alu_result_s;								
 							end if;
 							
+							reg_file_s(status_reg_addr) <= alu_sreg_val_s;
 							cur_exec_state_s <= decode;
 							
 						when others =>

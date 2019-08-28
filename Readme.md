@@ -20,6 +20,15 @@ CPU have 2 stage pipeline:
 	- Executing phase. CPU is executing instruction. 
 	- Write back. CPU is writing result back to destination register (if needed).
 
+## Status register (r13) bits
+
+- Bit 31 - Carry flag
+	- Indicates a carry in an operation.
+- Bit 30 - Zero flag 
+	- Indicate whether or not operation result is negative. If result of operation is equal to 0, than flag is set, otherwise flag is clear.
+- Bit 29 - Negative flag 
+	- Indicate whether or not operation result is negative. Flag is set if MSB of the result is set, otherwise flag is clear.
+
 ## Supported Instructions
 
 ### Noop instruction
