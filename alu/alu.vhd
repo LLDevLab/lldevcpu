@@ -29,18 +29,14 @@ begin
 	process(clk, enable)
 		variable zero_flag_v: std_ulogic := '0';
 		variable result_v: unsigned(32 downto 0) := (others => '0');
-		variable dest_data_v, src_data_v: unsigned(32 downto 0);
 	begin	
-		if(rising_edge(clk) and enable) then
-			src_data_v := '0' & src_data;
-			dest_data_v := '0' & dest_data;
-		
+		if(rising_edge(clk) and enable) then		
 			case op_code is
 				when add =>
-					result_v := dest_data_v + src_data_v;
+					result_v := ('0' & dest_data) + ('0' & src_data);
 					zero_flag_v := get_zero_flag(result_v);
 				when sub =>
-					result_v := dest_data_v - src_data_v;	
+					result_v := ('0' & dest_data) - ('0' & src_data);	
 					zero_flag_v := get_zero_flag(result_v);					
 				when others =>
 					result_v := (others => '0');
