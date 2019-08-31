@@ -13,9 +13,9 @@ entity alu is
 end entity;
 
 architecture alu of alu is
-	alias carry_flag_a: std_ulogic is sreg(31);
-	alias zero_flag_a: std_ulogic is sreg(30);
-	alias negative_flag_a: std_ulogic is sreg(29);
+	alias carry_flag_a: std_ulogic is sreg(carry_flag_pos);
+	alias zero_flag_a: std_ulogic is sreg(zero_flag_pos);
+	alias negative_flag_a: std_ulogic is sreg(negative_flag_pos);
 	
 	function get_zero_flag(result_param: unsigned(32 downto 0)) return std_ulogic is
 	begin

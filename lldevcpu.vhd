@@ -48,7 +48,7 @@ architecture lldevcpu_arch of lldevcpu is
 			sreg: out unsigned32);
 	end component;
 	
-	signal reg_file_s: regfile := (X"00000000", X"00000005", X"00000001", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
+	signal reg_file_s: regfile := (X"00000001", X"00000001", X"00000001", X"00000003", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
 	
 	-- ROM control signals
@@ -77,6 +77,11 @@ architecture lldevcpu_arch of lldevcpu is
 	signal uart_ready_s: boolean;
 	signal bit_out_s: std_logic;
 	
+	-- status register flags aliases
+	alias sreg_carry_a: std_ulogic is reg_file_s(status_reg_addr)(carry_flag_pos);
+	alias sreg_zero_a: std_ulogic is reg_file_s(status_reg_addr)(zero_flag_pos);
+	alias negative_flag_a: std_ulogic is reg_file_s(status_reg_addr)(negative_flag_pos);
+	
 	function need_writeback(op_code: opcode) return boolean is
 	begin
 		return (op_code = add or 
@@ -85,7 +90,23 @@ architecture lldevcpu_arch of lldevcpu is
 	
 	function is_branch(op_code: opcode) return boolean is
 	begin
-		return (op_code = br);
+		return (op_code = br or
+				op_code = breq);
+	end function;
+	
+	function need_branch(op_code: opcode; sreg_zero: std_ulogic) return boolean is
+		variable ret: boolean;
+	begin
+		case op_code is
+			when br =>
+				ret := true;
+			when breq =>
+				ret := sreg_zero = '1';
+			when others =>
+				ret := false;
+		end case;
+		
+		return ret;
 	end function;
 	
 	function is_arithmetic(op_code: opcode) return boolean is
@@ -170,11 +191,13 @@ begin
 							if(is_arithmetic(opcode_s)) then							
 								alu_dest_val_s <= reg_file_s(dest_reg_addr_s);
 								alu_src_val_s <= reg_file_s(src_reg_addr_s);
+								alu_enable_v := true;
 							elsif(is_branch(opcode_s)) then
-								reg_file_s(pc_reg_addr) <= reg_file_s(src_reg_addr_s);
+								if(need_branch(opcode_s, sreg_zero_a)) then
+									reg_file_s(pc_reg_addr) <= reg_file_s(src_reg_addr_s);
+								end if;
 							end if;
-							
-							alu_enable_v := true;
+														
 							cur_exec_state_s <= write_back;
 						when write_back =>
 							if(need_write_back_v) then
