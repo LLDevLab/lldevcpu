@@ -48,7 +48,7 @@ architecture lldevcpu_arch of lldevcpu is
 			sreg: out unsigned32);
 	end component;
 	
-	signal reg_file_s: regfile := (X"00000001", X"00000001", X"00000001", X"00000003", X"00000000", X"00000000", X"00000000", X"00000000",
+	signal reg_file_s: regfile := (X"00000003", X"00000001", X"00000001", X"00000003", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
 	
 	-- ROM control signals
@@ -80,7 +80,7 @@ architecture lldevcpu_arch of lldevcpu is
 	-- status register flags aliases
 	alias sreg_carry_a: std_ulogic is reg_file_s(status_reg_addr)(carry_flag_pos);
 	alias sreg_zero_a: std_ulogic is reg_file_s(status_reg_addr)(zero_flag_pos);
-	alias negative_flag_a: std_ulogic is reg_file_s(status_reg_addr)(negative_flag_pos);
+	alias sreg_negative_a: std_ulogic is reg_file_s(status_reg_addr)(negative_flag_pos);
 	
 	function need_writeback(op_code: opcode) return boolean is
 	begin
@@ -91,7 +91,8 @@ architecture lldevcpu_arch of lldevcpu is
 	function is_branch(op_code: opcode) return boolean is
 	begin
 		return (op_code = br or
-				op_code = breq);
+				op_code = breq or
+				op_code = brne);
 	end function;
 	
 	function need_branch(op_code: opcode; sreg_zero: std_ulogic) return boolean is
@@ -102,6 +103,8 @@ architecture lldevcpu_arch of lldevcpu is
 				ret := true;
 			when breq =>
 				ret := sreg_zero = '1';
+			when brne =>
+				ret := sreg_zero = '0';
 			when others =>
 				ret := false;
 		end case;
@@ -115,7 +118,6 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = sub);
 	end function;
 begin
-
 	sec_delay: clk_divider 
 				generic map(25_000_000)	
 				port map(clk, sec_s);
@@ -175,11 +177,7 @@ begin
 					case cur_exec_state_s is
 						when decode =>
 							next_pc_value := reg_file_s(pc_reg_addr);
-							
-							-- Limit executing instructions to 5
-							if(next_pc_value < 5) then
-								next_pc_value := next_pc_value + 1;
-							end if;	
+							next_pc_value := next_pc_value + 1;
 								
 							reg_file_s(pc_reg_addr) <= next_pc_value;
 							

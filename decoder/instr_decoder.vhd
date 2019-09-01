@@ -42,6 +42,10 @@ begin
 					instr_opcode <= breq;
 					dest_reg_addr_v := pc_reg_addr;
 					src_reg_addr_v := to_integer(unsigned(br_reg_addr_s));
+				when "000101" =>
+					instr_opcode <= brne;
+					dest_reg_addr_v := pc_reg_addr;
+					src_reg_addr_v := to_integer(unsigned(br_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;

@@ -55,7 +55,7 @@ CPU have 2 stage pipeline:
 - Example: sub r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
-### Unconditional branch instruction
+### Unconditional branch instruction (br)
 
 - Opcode: 000011
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. In this register actual branch address is stored. Bits 21 – 0 are reserved.
@@ -63,12 +63,20 @@ CPU have 2 stage pipeline:
 - Example: br r0 
 - Status flags affected: does not change status register flags.
 
-### Branch if equal instruction
+### Branch if equal instruction (breq)
 
 - Opcode: 000100
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. In this register actual branch address is stored. Bits 21 – 0 are reserved.
 - Description: Moves branch address from source register to Program Counter register, if zero flag in status register is set.
 - Example: breq r0 
+- Status flags affected: does not change status register flags.
+
+### Branch not if equal instruction (brne)
+
+- Opcode: 000101
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. In this register actual branch address is stored. Bits 21 – 0 are reserved.
+- Description: Moves branch address from source register to Program Counter register, if zero flag in status register is not set.
+- Example: brne r0 
 - Status flags affected: does not change status register flags.
 
 ## Related software
