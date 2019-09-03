@@ -46,6 +46,10 @@ begin
 					instr_opcode <= brne;
 					dest_reg_addr_v := pc_reg_addr;
 					src_reg_addr_v := to_integer(unsigned(br_reg_addr_s));
+				when "000110" =>
+					instr_opcode <= brlts;
+					dest_reg_addr_v := pc_reg_addr;
+					src_reg_addr_v := to_integer(unsigned(br_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;

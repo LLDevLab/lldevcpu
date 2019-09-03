@@ -48,7 +48,7 @@ architecture lldevcpu_arch of lldevcpu is
 			sreg: out unsigned32);
 	end component;
 	
-	signal reg_file_s: regfile := (X"00000003", X"00000001", X"00000001", X"00000003", X"00000000", X"00000000", X"00000000", X"00000000",
+	signal reg_file_s: regfile := (X"00000004", X"00000003", X"00000001", X"00000003", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
 	
 	-- ROM control signals
@@ -92,10 +92,11 @@ architecture lldevcpu_arch of lldevcpu is
 	begin
 		return (op_code = br or
 				op_code = breq or
-				op_code = brne);
+				op_code = brne or
+				op_code = brlts);
 	end function;
 	
-	function need_branch(op_code: opcode; sreg_zero: std_ulogic) return boolean is
+	function need_branch(op_code: opcode; sreg_zero, sreg_negative: std_ulogic) return boolean is
 		variable ret: boolean;
 	begin
 		case op_code is
@@ -105,6 +106,12 @@ architecture lldevcpu_arch of lldevcpu is
 				ret := sreg_zero = '1';
 			when brne =>
 				ret := sreg_zero = '0';
+			when brlts =>											-- rd less then rs (this instruction are using with signed integer numbers)
+				if(sreg_zero = '0' and sreg_negative = '1') then
+					ret := true;
+				else
+					ret := false;
+				end if;
 			when others =>
 				ret := false;
 		end case;
@@ -118,6 +125,7 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = sub);
 	end function;
 begin
+
 	sec_delay: clk_divider 
 				generic map(25_000_000)	
 				port map(clk, sec_s);
@@ -191,7 +199,7 @@ begin
 								alu_src_val_s <= reg_file_s(src_reg_addr_s);
 								alu_enable_v := true;
 							elsif(is_branch(opcode_s)) then
-								if(need_branch(opcode_s, sreg_zero_a)) then
+								if(need_branch(opcode_s, sreg_zero_a, sreg_negative_a)) then
 									reg_file_s(pc_reg_addr) <= reg_file_s(src_reg_addr_s);
 								end if;
 							end if;
