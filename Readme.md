@@ -79,12 +79,20 @@ CPU have 2 stage pipeline:
 - Example: brne r0 
 - Status flags affected: does not change status register flags.
 
-### Branch if less then instruction (for signed integers) (brlts)
+### Branch if less than instruction (for signed integers) (brlts)
 
 - Opcode: 000110
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. In this register actual branch address is stored. Bits 21 – 0 are reserved.
-- Description: This instruction is using with signed integer numbers. It moves branch address from source register to Program Counter register, if negative flag in status register is set (value in rd register was less then value in rs register).
+- Description: This instruction is using with signed integer numbers. It moves branch address from source register to Program Counter register, if negative flag in status register is set (value in rd register was less than value in rs register).
 - Example: brlts r0 
+- Status flags affected: does not change status register flags.
+
+### Branch if greater than instruction (for signed integers) (brgts)
+
+- Opcode: 000111
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. In this register actual branch address is stored. Bits 21 – 0 are reserved.
+- Description: This instruction is using with signed integer numbers. It moves branch address from source register to Program Counter register, if negative flag in status register is not set (value in rd register was greater than value in rs register).
+- Example: brgts r0 
 - Status flags affected: does not change status register flags.
 
 ## Related software

@@ -93,7 +93,8 @@ architecture lldevcpu_arch of lldevcpu is
 		return (op_code = br or
 				op_code = breq or
 				op_code = brne or
-				op_code = brlts);
+				op_code = brlts or
+				op_code = brgts);
 	end function;
 	
 	function need_branch(op_code: opcode; sreg_zero, sreg_negative: std_ulogic) return boolean is
@@ -106,12 +107,10 @@ architecture lldevcpu_arch of lldevcpu is
 				ret := sreg_zero = '1';
 			when brne =>
 				ret := sreg_zero = '0';
-			when brlts =>											-- rd less then rs (this instruction are using with signed integer numbers)
-				if(sreg_zero = '0' and sreg_negative = '1') then
-					ret := true;
-				else
-					ret := false;
-				end if;
+			when brlts =>											-- rd is less than rs (this instruction is using with signed integer numbers)
+				ret := sreg_negative = '1';
+			when brgts =>											-- rd is greater than rs (this instruction is using with signed integer numbers)
+				ret := sreg_negative = '0';
 			when others =>
 				ret := false;
 		end case;
@@ -125,7 +124,7 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = sub);
 	end function;
 begin
-
+	
 	sec_delay: clk_divider 
 				generic map(25_000_000)	
 				port map(clk, sec_s);
