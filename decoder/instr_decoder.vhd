@@ -54,6 +54,10 @@ begin
 					instr_opcode <= brgts;
 					dest_reg_addr_v := pc_reg_addr;
 					src_reg_addr_v := to_integer(unsigned(br_reg_addr_s));
+				when "001000" =>
+					instr_opcode <= brltu;
+					dest_reg_addr_v := pc_reg_addr;
+					src_reg_addr_v := to_integer(unsigned(br_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;

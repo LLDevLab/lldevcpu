@@ -95,6 +95,14 @@ CPU have 2 stage pipeline:
 - Example: brgts r0 
 - Status flags affected: does not change status register flags.
 
+### Branch if less than instruction (for unsigned integers) (brltu)
+
+- Opcode: 001000
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. In this register actual branch address is stored. Bits 21 – 0 are reserved.
+- Description: This instruction is using with unsigned integer numbers. It moves branch address from source register to Program Counter register, if carry flag in status register is set (value in rd register was less than value in rs register).
+- Example: brltu r0 
+- Status flags affected: does not change status register flags.
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

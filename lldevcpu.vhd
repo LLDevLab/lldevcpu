@@ -94,10 +94,11 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = breq or
 				op_code = brne or
 				op_code = brlts or
-				op_code = brgts);
+				op_code = brgts or
+				op_code = brltu);
 	end function;
 	
-	function need_branch(op_code: opcode; sreg_zero, sreg_negative: std_ulogic) return boolean is
+	function need_branch(op_code: opcode; sreg_carry, sreg_zero, sreg_negative: std_ulogic) return boolean is
 		variable ret: boolean;
 	begin
 		case op_code is
@@ -111,6 +112,8 @@ architecture lldevcpu_arch of lldevcpu is
 				ret := sreg_negative = '1';
 			when brgts =>											-- rd is greater than rs (this instruction is using with signed integer numbers)
 				ret := sreg_negative = '0';
+			when brltu =>
+				ret := sreg_carry = '1';							-- rd is less than rs (this instruction is using with unsigned integer numbers)
 			when others =>
 				ret := false;
 		end case;
@@ -198,7 +201,7 @@ begin
 								alu_src_val_s <= reg_file_s(src_reg_addr_s);
 								alu_enable_v := true;
 							elsif(is_branch(opcode_s)) then
-								if(need_branch(opcode_s, sreg_zero_a, sreg_negative_a)) then
+								if(need_branch(opcode_s, sreg_carry_a, sreg_zero_a, sreg_negative_a)) then
 									reg_file_s(pc_reg_addr) <= reg_file_s(src_reg_addr_s);
 								end if;
 							end if;
