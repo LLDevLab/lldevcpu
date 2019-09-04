@@ -95,7 +95,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = brne or
 				op_code = brlts or
 				op_code = brgts or
-				op_code = brltu);
+				op_code = brltu or
+				op_code = brgtu);
 	end function;
 	
 	function need_branch(op_code: opcode; sreg_carry, sreg_zero, sreg_negative: std_ulogic) return boolean is
@@ -114,6 +115,8 @@ architecture lldevcpu_arch of lldevcpu is
 				ret := sreg_negative = '0';
 			when brltu =>
 				ret := sreg_carry = '1';							-- rd is less than rs (this instruction is using with unsigned integer numbers)
+			when brgtu =>
+				ret := sreg_carry = '0';							-- rd is greater than rs (this instruction is using with unsigned integer numbers)					
 			when others =>
 				ret := false;
 		end case;
