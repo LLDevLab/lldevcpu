@@ -118,6 +118,13 @@ CPU have 2 stage pipeline:
 - Example: cmp r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
+### Clear instruction (clr)
+- Opcode: 001011
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address. Other bits are reserved.
+- Description: Clears all bits in destination register.
+- Example: clr r0
+- Status flags affected: All flags will be cleared.
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

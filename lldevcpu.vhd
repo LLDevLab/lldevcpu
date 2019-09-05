@@ -85,7 +85,8 @@ architecture lldevcpu_arch of lldevcpu is
 	function need_writeback(op_code: opcode) return boolean is
 	begin
 		return (op_code = add or 
-				op_code = sub);
+				op_code = sub or
+				op_code = clr);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -128,7 +129,8 @@ architecture lldevcpu_arch of lldevcpu is
 	begin
 		return (op_code = add or 
 				op_code = sub or
-				op_code = cmp);
+				op_code = cmp or
+				op_code = clr);
 	end function;
 begin
 	

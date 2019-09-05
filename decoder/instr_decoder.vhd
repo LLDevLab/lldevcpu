@@ -66,6 +66,10 @@ begin
 					instr_opcode <= cmp;
 					src_reg_addr_v := to_integer(unsigned(src_reg_addr_s));
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+				when "001011" =>
+					instr_opcode <= clr;
+					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));	
 				when others =>
 					instr_opcode <= noop;
 			end case;
