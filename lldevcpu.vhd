@@ -48,7 +48,7 @@ architecture lldevcpu_arch of lldevcpu is
 			sreg: out unsigned32);
 	end component;
 	
-	signal reg_file_s: regfile := (X"00000004", X"00000003", X"00000001", X"00000003", X"00000000", X"00000000", X"00000000", X"00000000",
+	signal reg_file_s: regfile := (X"00000000", X"00000004", X"00000001", X"00000004", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
 	
 	-- ROM control signals
@@ -127,7 +127,8 @@ architecture lldevcpu_arch of lldevcpu is
 	function is_arithmetic(op_code: opcode) return boolean is
 	begin
 		return (op_code = add or 
-				op_code = sub);
+				op_code = sub or
+				op_code = cmp);
 	end function;
 begin
 	

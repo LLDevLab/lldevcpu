@@ -62,6 +62,10 @@ begin
 					instr_opcode <= brgtu;
 					dest_reg_addr_v := pc_reg_addr;
 					src_reg_addr_v := to_integer(unsigned(br_reg_addr_s));
+				when "001010" =>
+					instr_opcode <= cmp;
+					src_reg_addr_v := to_integer(unsigned(src_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;

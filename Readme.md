@@ -111,6 +111,13 @@ CPU have 2 stage pipeline:
 - Example: brgtu r0 
 - Status flags affected: does not change status register flags.
 
+### Compare instruction (cmp)
+- Opcode: 001010
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
+- Description: Subtracts source register's value from destination register's value and sets appropriate flags in Status register. Value in source and destination register will not be changed.
+- Example: cmp r0, r1
+- Status flags affected: Can affect carry, zero and negative flags
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)
