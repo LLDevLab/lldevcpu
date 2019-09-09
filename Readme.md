@@ -125,6 +125,13 @@ CPU have 2 stage pipeline:
 - Example: clr r0
 - Status flags affected: All flags will be cleared.
 
+### Load immediate instruction (ldi)
+- Opcode: 001100
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address, bits 21 - 0 value of immediate number.
+- Description: Clears all bits in destination register. Loads immediate number to a register. A number can be 22 bits long (0 – 4194303).
+- Example: ldi r0, #10 (loads decimal 10 to r0 register)
+- Status flags affected: does not change status register flags.
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

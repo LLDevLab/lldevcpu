@@ -11,9 +11,10 @@ package lldevcpu_pack is
 	constant zero_flag_pos: integer := 30;
 	constant negative_flag_pos: integer := 29;
 
-	type opcode is (noop, add, sub, br, breq, brne, brlts, brgts, brltu, brgtu, cmp, clr);
+	type opcode is (noop, add, sub, br, breq, brne, brlts, brgts, brltu, brgtu, cmp, clr, ldi);
 	subtype rom_data is std_logic_vector(31 downto 0);
 	subtype reg_addr is integer range 0 to 15;
 	subtype rom_addr is std_logic_vector(rom_addr_msb_num downto 0);
 	subtype unsigned32 is unsigned(31 downto 0);
+	subtype unsigned22 is unsigned(21 downto 0);
 end lldevcpu_pack;

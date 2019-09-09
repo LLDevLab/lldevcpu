@@ -36,7 +36,8 @@ architecture lldevcpu_arch of lldevcpu is
 			instruction: in rom_data; 
 			instr_opcode: out opcode; 
 			dest_reg_addr: out reg_addr;
-			src_reg_addr: out reg_addr);
+			src_reg_addr: out reg_addr;
+			immediate_val: out unsigned22);
 	end component;
 	
 	component alu is
@@ -48,9 +49,9 @@ architecture lldevcpu_arch of lldevcpu is
 			sreg: out unsigned32);
 	end component;
 	
-	signal reg_file_s: regfile := (X"00000000", X"00000004", X"00000001", X"00000004", X"00000000", X"00000000", X"00000000", X"00000000",
+	signal reg_file_s: regfile := (X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
-	
+		
 	-- ROM control signals
 	signal rom_data_s: rom_data := X"00000000";
 	
@@ -59,6 +60,7 @@ architecture lldevcpu_arch of lldevcpu is
 	signal opcode_s: opcode;
 	signal dest_reg_addr_s: reg_addr := 0;
 	signal src_reg_addr_s: reg_addr := 0;
+	signal immediate_val_s: unsigned22 := (others => '0');
 	
 	-- ALU control signals
 	signal alu_enable_s: boolean;
@@ -86,7 +88,8 @@ architecture lldevcpu_arch of lldevcpu is
 	begin
 		return (op_code = add or 
 				op_code = sub or
-				op_code = clr);
+				op_code = clr or
+				op_code = ldi);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -153,7 +156,8 @@ begin
 											instruction_s,
 											opcode_s,
 											dest_reg_addr_s,
-											src_reg_addr_s);
+											src_reg_addr_s, 
+											immediate_val_s);
 											
 	alu1: alu port map(alu_enable_s,
 						sec_s,
@@ -209,13 +213,17 @@ begin
 							elsif(is_branch(opcode_s)) then
 								if(need_branch(opcode_s, sreg_carry_a, sreg_zero_a, sreg_negative_a)) then
 									reg_file_s(pc_reg_addr) <= reg_file_s(src_reg_addr_s);
-								end if;
+								end if;							
 							end if;
 														
 							cur_exec_state_s <= write_back;
 						when write_back =>
 							if(need_write_back_v) then
-								reg_file_s(dest_reg_addr_s) <= alu_result_s;								
+								if(opcode_s = ldi) then
+									reg_file_s(dest_reg_addr_s) <= "0000000000" & immediate_val_s;
+								else
+									reg_file_s(dest_reg_addr_s) <= alu_result_s;
+								end if;
 							end if;
 							
 							reg_file_s(status_reg_addr) <= alu_sreg_val_s;

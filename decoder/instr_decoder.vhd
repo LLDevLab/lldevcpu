@@ -8,7 +8,8 @@ entity instr_decoder is
 			instruction: in rom_data; 
 			instr_opcode: out opcode; 
 			dest_reg_addr: out reg_addr := 0;
-			src_reg_addr: out reg_addr := 0);
+			src_reg_addr: out reg_addr := 0;
+			immediate_val: out unsigned22 := (others => '0'));
 end entity instr_decoder;
 
 architecture instr_decoder_arch of instr_decoder is
@@ -16,14 +17,17 @@ architecture instr_decoder_arch of instr_decoder is
 	alias dest_reg_addr_s: std_logic_vector(3 downto 0) is instruction(25 downto 22);
 	alias src_reg_addr_s: std_logic_vector(3 downto 0) is instruction(21 downto 18);
 	alias br_reg_addr_s: std_logic_vector(3 downto 0) is instruction(25 downto 22);
+	alias immediate_val_s: std_logic_vector(21 downto 0) is instruction(21 downto 0);
 begin
 	process(clk)
 		variable src_reg_addr_v: reg_addr := 0;
 		variable dest_reg_addr_v: reg_addr := 0;
+		variable immediate_val_v: unsigned22 := (others => '0');
 	begin
 		if(rising_edge(clk)) then
 			src_reg_addr_v := 0;
 			dest_reg_addr_v := 0;
+			immediate_val_v := (others => '0');
 					
 			case opcode_bin_s is
 				when "000001" =>
@@ -69,11 +73,17 @@ begin
 				when "001011" =>
 					instr_opcode <= clr;
 					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
-					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));	
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+				when "001100" =>
+					instr_opcode <= ldi;
+					immediate_val_v := unsigned(immediate_val_s);
+					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;
 			
+			immediate_val <= immediate_val_v;
 			src_reg_addr <= src_reg_addr_v;
 			dest_reg_addr <= dest_reg_addr_v;
 		end if;
