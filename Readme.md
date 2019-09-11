@@ -137,7 +137,7 @@ CPU have 2 stage pipeline:
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Doing bit-wise OR operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
 - Example: or r0, r1
-- Status flags affected: Can affect zero and negative flags
+- Status flags affected: Can affect carry, zero and negative flags
 
 ## Related software
 
