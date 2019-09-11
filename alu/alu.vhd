@@ -41,6 +41,9 @@ begin
 				when clr =>
 					result_v := (others => '0');
 					zero_flag_v := '0';
+				when or_op =>
+					result_v := ('0' & dest_data) or ('0' & src_data);
+					zero_flag_v := get_zero_flag(result_v);
 				when others =>
 					result_v := (others => '0');
 					zero_flag_v := '0';

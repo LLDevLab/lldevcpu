@@ -89,7 +89,8 @@ architecture lldevcpu_arch of lldevcpu is
 		return (op_code = add or 
 				op_code = sub or
 				op_code = clr or
-				op_code = ldi);
+				op_code = ldi or
+				op_code = or_op);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -134,6 +135,11 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = sub or
 				op_code = cmp or
 				op_code = clr);
+	end function;
+	
+	function is_logic(op_code: opcode) return boolean is
+	begin
+		return op_code = or_op;
 	end function;
 begin
 	
@@ -206,7 +212,7 @@ begin
 						when exec =>
 							need_write_back_v := need_writeback(opcode_s);
 							
-							if(is_arithmetic(opcode_s)) then							
+							if(is_arithmetic(opcode_s) or is_logic(opcode_s)) then							
 								alu_dest_val_s <= reg_file_s(dest_reg_addr_s);
 								alu_src_val_s <= reg_file_s(src_reg_addr_s);
 								alu_enable_v := true;
