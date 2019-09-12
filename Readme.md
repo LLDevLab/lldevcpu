@@ -135,8 +135,14 @@ CPU have 2 stage pipeline:
 
 ### OR instruction (or)
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
-- Description: Doing bit-wise OR operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
+- Description: Doing bitwise OR operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
 - Example: or r0, r1
+- Status flags affected: Can affect carry, zero and negative flags
+
+### AND instruction (and)
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
+- Description: Doing bitwise AND operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
+- Example: and r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
 ## Related software
