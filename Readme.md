@@ -153,7 +153,7 @@ CPU have 2 stage pipeline:
 
 ### NOT instruction (not)
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address. Other bits are reserved.
-- Description: Doing bitwise NOT operation on values from destination register (rd) and storing the result to destination register (rd)
+- Description: Doing bitwise NOT operation on value from destination register (rd) and storing the result to destination register (rd)
 - Example: not r0
 - Status flags affected: Can affect carry, zero and negative flags
 
