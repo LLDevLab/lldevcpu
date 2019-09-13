@@ -92,7 +92,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = ldi or
 				op_code = or_op or
 				op_code = and_op or
-				op_code = xor_op);
+				op_code = xor_op or
+				op_code = not_op);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -143,7 +144,8 @@ architecture lldevcpu_arch of lldevcpu is
 	begin
 		return (op_code = or_op or
 				op_code = and_op or
-				op_code = xor_op);
+				op_code = xor_op or
+				op_code = not_op);
 	end function;
 begin
 	
