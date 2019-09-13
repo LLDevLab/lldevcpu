@@ -47,6 +47,9 @@ begin
 				when and_op =>
 					result_v := ('0' & dest_data) and ('0' & src_data);
 					zero_flag_v := get_zero_flag(result_v);
+				when xor_op =>
+					result_v := ('0' & dest_data) xor ('0' & src_data);
+					zero_flag_v := get_zero_flag(result_v);
 				when others =>
 					result_v := (others => '0');
 					zero_flag_v := '0';

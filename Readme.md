@@ -145,6 +145,12 @@ CPU have 2 stage pipeline:
 - Example: and r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
+### XOR instruction (xor)
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
+- Description: Doing bitwise XOR operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
+- Example: xor r0, r1
+- Status flags affected: Can affect carry, zero and negative flags
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

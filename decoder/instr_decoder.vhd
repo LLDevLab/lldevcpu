@@ -87,6 +87,10 @@ begin
 					instr_opcode <= and_op;					
 					src_reg_addr_v := to_integer(unsigned(src_reg_addr_s));
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+				when "001111" =>
+					instr_opcode <= xor_op;					
+					src_reg_addr_v := to_integer(unsigned(src_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;
