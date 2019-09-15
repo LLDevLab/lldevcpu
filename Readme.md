@@ -138,28 +138,28 @@ CPU have 2 stage pipeline:
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Doing bitwise OR operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
 - Example: or r0, r1
-- Status flags affected: Can affect carry, zero and negative flags
+- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
 
 ### AND instruction (and)
 - Opcode: 001110
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Doing bitwise AND operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
 - Example: and r0, r1
-- Status flags affected: Can affect carry, zero and negative flags
+- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
 
 ### XOR instruction (xor)
 - Opcode: 001111
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Doing bitwise XOR operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
 - Example: xor r0, r1
-- Status flags affected: Can affect carry, zero and negative flags
+- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
 
 ### NOT instruction (not)
 - Opcode: 010000
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address. Other bits are reserved.
 - Description: Doing bitwise NOT operation on value from destination register (rd) and storing the result to destination register (rd)
 - Example: not r0
-- Status flags affected: Can affect carry, zero and negative flags
+- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
 
 ### Lelf shift instruction (lsh)
 - Opcode: 010001
@@ -167,7 +167,15 @@ CPU have 2 stage pipeline:
 - Description: Doing bitwise left shift operation on value from destination register (rd) and storing the result to destination register (rd). An immediate number can be 5 bits long (0 – 31).
 - Decimal example: lsh r0, #10
 - Hexadecimal example: lsh r0, #0x10
-- Status flags affected: Can affect carry, zero and negative flags.
+- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
+
+### Right shift instruction (rsh)
+- Opcode: 010010
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address, bits 21 - 17 value of immediate number. Other bits are reserved.
+- Description: Doing bitwise right shift operation on value from destination register (rd) and storing the result to destination register (rd). An immediate number can be 5 bits long (0 – 31).
+- Decimal example: rsh r0, #10
+- Hexadecimal example: rsh r0, #0x10
+- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
 
 ## Related software
 
