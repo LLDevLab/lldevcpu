@@ -164,7 +164,7 @@ CPU have 2 stage pipeline:
 ### Lelf shift instruction (lsh)
 - Opcode: 010001
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address, bits 21 - 17 value of immediate number. Other bits are reserved.
-- Description: Doing bitwise left shift operation on value from destination register (rd) and storing the result to destination register (rd). A number can be 5 bits long (0 – 31).
+- Description: Doing bitwise left shift operation on value from destination register (rd) and storing the result to destination register (rd). An immediate number can be 5 bits long (0 – 31).
 - Decimal example: lsh r0, #10
 - Hexadecimal example: lsh r0, #0x10
 - Status flags affected: Can affect carry, zero and negative flags.
