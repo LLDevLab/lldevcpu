@@ -27,39 +27,39 @@ architecture alu of alu is
 	end function;
 begin	
 	process(clk, enable)
-		variable zero_flag_v: std_ulogic := '0';
+		variable is_opcode_processed_v: std_ulogic;
 		variable result_v: unsigned(32 downto 0) := (others => '0');
 	begin	
-		if(rising_edge(clk) and enable) then		
+		if(rising_edge(clk) and enable) then
+			is_opcode_processed_v := '1';
+		
 			case op_code is
 				when add =>
 					result_v := ('0' & dest_data) + ('0' & src_data);
-					zero_flag_v := get_zero_flag(result_v);
 				when sub | cmp =>
 					result_v := ('0' & dest_data) - ('0' & src_data);	
-					zero_flag_v := get_zero_flag(result_v);
 				when clr =>
 					result_v := (others => '0');
-					zero_flag_v := '0';
 				when or_op =>
 					result_v := ('0' & dest_data) or ('0' & src_data);
-					zero_flag_v := get_zero_flag(result_v);
 				when and_op =>
 					result_v := ('0' & dest_data) and ('0' & src_data);
-					zero_flag_v := get_zero_flag(result_v);
 				when xor_op =>
 					result_v := ('0' & dest_data) xor ('0' & src_data);
-					zero_flag_v := get_zero_flag(result_v);
 				when not_op =>
 					result_v := '0' & (not dest_data);
-					zero_flag_v := get_zero_flag(result_v);
+				when lsh =>
+					result_v := '0' & shift_left(dest_data, to_integer(src_data));
 				when others =>
 					result_v := (others => '0');
-					zero_flag_v := '0';
+					is_opcode_processed_v := '0';
 			end case;
 			
 			carry_flag_a <= result_v(32);			-- bit 32 of result_v is a carry bit (carry bit can be used as overflow bit)
-			zero_flag_a <= zero_flag_v;
+			
+			-- setting zero flag if opcode is processed by ALU 
+			zero_flag_a <= is_opcode_processed_v and get_zero_flag(result_v); 
+			
 			negative_flag_a <= result_v(31);		-- Set negative flag if MSB of the result is set
 			result <= result_v(31 downto 0);
 		end if;

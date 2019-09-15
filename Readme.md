@@ -123,7 +123,7 @@ CPU have 2 stage pipeline:
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address. Other bits are reserved.
 - Description: Clears all bits in destination register.
 - Example: clr r0
-- Status flags affected: All flags will be cleared.
+- Status flags affected: Carry and negative flags will be cleared, zero flag will be set.
 
 ### Load immediate instruction (ldi)
 - Opcode: 001100
@@ -134,28 +134,40 @@ CPU have 2 stage pipeline:
 - Status flags affected: does not change status register flags.
 
 ### OR instruction (or)
+- Opcode: 001101
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Doing bitwise OR operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
 - Example: or r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
 ### AND instruction (and)
+- Opcode: 001110
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Doing bitwise AND operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
 - Example: and r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
 ### XOR instruction (xor)
+- Opcode: 001111
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Doing bitwise XOR operation on values from 2 registers (rd and rs) and storing the result to destination register (rd)
 - Example: xor r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
 ### NOT instruction (not)
+- Opcode: 010000
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address. Other bits are reserved.
 - Description: Doing bitwise NOT operation on value from destination register (rd) and storing the result to destination register (rd)
 - Example: not r0
 - Status flags affected: Can affect carry, zero and negative flags
+
+### Lelf shift instruction (lsh)
+- Opcode: 010001
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address, bits 21 - 17 value of immediate number. Other bits are reserved.
+- Description: Doing bitwise left shift operation on value from destination register (rd) and storing the result to destination register (rd). A number can be 5 bits long (0 – 31).
+- Decimal example: lsh r0, #10
+- Hexadecimal example: lsh r0, #0x10
+- Status flags affected: Can affect carry, zero and negative flags.
 
 ## Related software
 

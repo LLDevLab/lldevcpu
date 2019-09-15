@@ -17,7 +17,8 @@ architecture instr_decoder_arch of instr_decoder is
 	alias dest_reg_addr_s: std_logic_vector(3 downto 0) is instruction(25 downto 22);
 	alias src_reg_addr_s: std_logic_vector(3 downto 0) is instruction(21 downto 18);
 	alias br_reg_addr_s: std_logic_vector(3 downto 0) is instruction(25 downto 22);
-	alias immediate_val_s: std_logic_vector(21 downto 0) is instruction(21 downto 0);
+	alias ldi_immediate_val_s: std_logic_vector(21 downto 0) is instruction(21 downto 0);
+	alias lsh_immediate_val_s: std_logic_vector(4 downto 0) is instruction(21 downto 17);
 begin
 	process(clk)
 		variable src_reg_addr_v: reg_addr := 0;
@@ -76,7 +77,7 @@ begin
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when "001100" =>
 					instr_opcode <= ldi;
-					immediate_val_v := unsigned(immediate_val_s);
+					immediate_val_v := unsigned(ldi_immediate_val_s);
 					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when "001101" =>
@@ -95,6 +96,11 @@ begin
 					instr_opcode <= not_op;					
 					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+				when "010001" =>
+					instr_opcode <= lsh;	
+					immediate_val_v := "00000000000000000" & unsigned(lsh_immediate_val_s);					
+					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));					
 				when others =>
 					instr_opcode <= noop;
 			end case;

@@ -93,7 +93,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = or_op or
 				op_code = and_op or
 				op_code = xor_op or
-				op_code = not_op);
+				op_code = not_op or
+				op_code = lsh);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -146,6 +147,11 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = and_op or
 				op_code = xor_op or
 				op_code = not_op);
+	end function;
+	
+	function is_shift_rotate(op_code: opcode) return boolean is
+	begin
+		return (op_code = lsh);
 	end function;
 begin
 	
@@ -225,7 +231,11 @@ begin
 							elsif(is_branch(opcode_s)) then
 								if(need_branch(opcode_s, sreg_carry_a, sreg_zero_a, sreg_negative_a)) then
 									reg_file_s(pc_reg_addr) <= reg_file_s(src_reg_addr_s);
-								end if;							
+								end if;	
+							elsif(is_shift_rotate(opcode_s)) then
+								alu_dest_val_s <= reg_file_s(dest_reg_addr_s);
+								alu_src_val_s <= "000000000000000000000000000" & immediate_val_s(4 downto 0);
+								alu_enable_v := true;
 							end if;
 														
 							cur_exec_state_s <= write_back;
