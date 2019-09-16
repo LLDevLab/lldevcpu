@@ -49,9 +49,9 @@ begin
 				when not_op =>
 					result_v := '0' & (not dest_data);
 				when lsh =>
-					result_v := '0' & shift_left(dest_data, to_integer(src_data));
+					result_v := dest_data(31) & shift_left(dest_data, to_integer(src_data));
 				when rsh =>
-					result_v := '0' & shift_right(dest_data, to_integer(src_data));
+					result_v := dest_data(0) & shift_right(dest_data, to_integer(src_data));
 				when others =>
 					result_v := (others => '0');
 					is_opcode_processed_v := '0';
