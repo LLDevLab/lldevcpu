@@ -167,7 +167,7 @@ CPU have 2 stage pipeline:
 - Description: Doing bitwise left shift operation on value from destination register (rd) and storing the result to destination register (rd). An immediate number can be 5 bits long (0 – 31).
 - Decimal example: lsh r0, #10
 - Hexadecimal example: lsh r0, #0x10
-- Status flags affected: Carry flag will be taken from not shifted MSB value, zero and negative flags values depends on destination register's value.
+- Status flags affected: Carry flag will be taken from the last shifted bit, zero and negative flags values depends on destination register's value.
 
 ### Right shift instruction (rsh)
 - Opcode: 010010
@@ -175,7 +175,7 @@ CPU have 2 stage pipeline:
 - Description: Doing bitwise right shift operation on value from destination register (rd) and storing the result to destination register (rd). An immediate number can be 5 bits long (0 – 31).
 - Decimal example: rsh r0, #10
 - Hexadecimal example: rsh r0, #0x10
-- Status flags affected: Carry flag will be taken from not shifted LSB value, zero and negative flags values depends on destination register's value.
+- Status flags affected: Carry flag will be taken from the last shifted bit, zero and negative flags values depends on destination register's value.
 
 ## Related software
 

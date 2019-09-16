@@ -29,9 +29,11 @@ begin
 	process(clk, enable)
 		variable is_opcode_processed_v: std_ulogic;
 		variable result_v: unsigned(32 downto 0) := (others => '0');
+		variable shift_rotate_imm_v: integer range 0 to 31;
 	begin	
 		if(rising_edge(clk) and enable) then
 			is_opcode_processed_v := '1';
+			shift_rotate_imm_v := to_integer(src_data(4 downto 0));
 		
 			case op_code is
 				when add =>
@@ -49,9 +51,11 @@ begin
 				when not_op =>
 					result_v := '0' & (not dest_data);
 				when lsh =>
-					result_v := dest_data(31) & shift_left(dest_data, to_integer(src_data));
+					result_v := shift_left('0' & dest_data, shift_rotate_imm_v);
 				when rsh =>
-					result_v := dest_data(0) & shift_right(dest_data, to_integer(src_data));
+					result_v := shift_right(dest_data & '0', shift_rotate_imm_v);
+					-- After shifting carry bit will be at position 0, we shoild move it to position 32
+					result_v := rotate_right(result_v, 1);						
 				when others =>
 					result_v := (others => '0');
 					is_opcode_processed_v := '0';
