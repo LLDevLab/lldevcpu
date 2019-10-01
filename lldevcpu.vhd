@@ -95,7 +95,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = xor_op or
 				op_code = not_op or
 				op_code = lsh or
-				op_code = rsh);
+				op_code = rsh or
+				op_code = rtl);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -153,7 +154,8 @@ architecture lldevcpu_arch of lldevcpu is
 	function is_shift_rotate(op_code: opcode) return boolean is
 	begin
 		return (op_code = lsh or
-				op_code = rsh);
+				op_code = rsh or
+				op_code = rtl);
 	end function;
 begin
 	

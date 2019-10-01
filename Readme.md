@@ -177,6 +177,14 @@ CPU have 2 stage pipeline:
 - Hexadecimal example: rsh r0, #0x10
 - Status flags affected: Carry flag will be taken from the last shifted bit, zero and negative flags values depends on destination register's value.
 
+### Rotate left instruction (rtl)
+- Opcode: 010011
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address, bits 21 - 17 value of immediate number. Other bits are reserved.
+- Description: Doing bitwise rotate left operation on value from destination register (rd) and storing the result to destination register (rd). An immediate number can be 5 bits long (0 – 31).
+- Decimal example: rtl r0, #10
+- Hexadecimal example: rtl r0, #0x10
+- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

@@ -55,7 +55,9 @@ begin
 				when rsh =>
 					result_v := shift_right(dest_data & '0', shift_rotate_imm_v);
 					-- After shifting carry bit will be at position 0, we shoild move it to position 32
-					result_v := rotate_right(result_v, 1);						
+					result_v := rotate_right(result_v, 1);
+				when rtl =>
+					result_v := '0' & rotate_left(dest_data, shift_rotate_imm_v);
 				when others =>
 					result_v := (others => '0');
 					is_opcode_processed_v := '0';

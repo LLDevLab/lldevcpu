@@ -106,6 +106,11 @@ begin
 					immediate_val_v := "00000000000000000" & unsigned(shift_rotate_imm_val_s);					
 					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+				when "010011" =>
+					instr_opcode <= rtl;	
+					immediate_val_v := "00000000000000000" & unsigned(shift_rotate_imm_val_s);					
+					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;
