@@ -58,6 +58,8 @@ begin
 					result_v := rotate_right(result_v, 1);
 				when rtl =>
 					result_v := '0' & rotate_left(dest_data, shift_rotate_imm_v);
+				when rtr =>
+					result_v := '0' & rotate_right(dest_data, shift_rotate_imm_v);
 				when others =>
 					result_v := (others => '0');
 					is_opcode_processed_v := '0';

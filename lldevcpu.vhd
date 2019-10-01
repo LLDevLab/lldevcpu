@@ -96,7 +96,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = not_op or
 				op_code = lsh or
 				op_code = rsh or
-				op_code = rtl);
+				op_code = rtl or
+				op_code = rtr);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -155,7 +156,8 @@ architecture lldevcpu_arch of lldevcpu is
 	begin
 		return (op_code = lsh or
 				op_code = rsh or
-				op_code = rtl);
+				op_code = rtl or
+				op_code = rtr);
 	end function;
 begin
 	
