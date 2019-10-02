@@ -183,7 +183,7 @@ CPU have 2 stage pipeline:
 - Description: Doing bitwise rotate left operation on value from destination register (rd) and storing the result to destination register (rd). An immediate number can be 5 bits long (0 – 31).
 - Decimal example: rtl r0, #10
 - Hexadecimal example: rtl r0, #0x10
-- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
+- Status flags affected: Carry flag will be taken from result's zero bit, zero and negative flags values depends on destination register's value.
 
 ### Rotate right instruction (rtr)
 - Opcode: 010100
@@ -191,7 +191,7 @@ CPU have 2 stage pipeline:
 - Description: Doing bitwise rotate right operation on value from destination register (rd) and storing the result to destination register (rd). An immediate number can be 5 bits long (0 – 31).
 - Decimal example: rtr r0, #10
 - Hexadecimal example: rtr r0, #0x10
-- Status flags affected: Carry flag will be cleared, zero and negative flags values depends on destination register's value.
+- Status flags affected: Carry flag will be taken from result's 31th bit, zero and negative flags values depends on destination register's value.
 
 ## Related software
 

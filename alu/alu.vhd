@@ -27,6 +27,7 @@ architecture alu of alu is
 	end function;
 begin	
 	process(clk, enable)
+		constant carry_bit_pos: integer := 32;
 		variable is_opcode_processed_v: std_ulogic;
 		variable result_v: unsigned(32 downto 0) := (others => '0');
 		variable shift_rotate_imm_v: integer range 0 to 31;
@@ -58,19 +59,21 @@ begin
 					result_v := rotate_right(result_v, 1);
 				when rtl =>
 					result_v := '0' & rotate_left(dest_data, shift_rotate_imm_v);
+					result_v(carry_bit_pos) := result_v(0);
 				when rtr =>
 					result_v := '0' & rotate_right(dest_data, shift_rotate_imm_v);
+					result_v(carry_bit_pos) := result_v(31);
 				when others =>
 					result_v := (others => '0');
 					is_opcode_processed_v := '0';
 			end case;
 			
-			carry_flag_a <= result_v(32);			-- bit 32 of result_v is a carry bit (carry bit can be used as overflow bit)
+			carry_flag_a <= result_v(carry_bit_pos); 	-- bit 32 of result_v is a carry bit (carry bit can be used as overflow bit)
 			
 			-- setting zero flag if opcode is processed by ALU 
 			zero_flag_a <= is_opcode_processed_v and get_zero_flag(result_v); 
 			
-			negative_flag_a <= result_v(31);		-- Set negative flag if MSB of the result is set
+			negative_flag_a <= result_v(31);			-- Set negative flag if MSB of the result is set
 			result <= result_v(31 downto 0);
 		end if;
 	end process;
