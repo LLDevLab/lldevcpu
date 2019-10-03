@@ -209,6 +209,14 @@ CPU have 2 stage pipeline:
 - Hexadecimal example: rtrc r0, #0x10
 - Status flags affected: The last rotated bit will be moved to carry flag, zero and negative flags values depends on destination register's value.
 
+### Add through carry bit instruction
+
+- Opcode: 010111
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
+- Description: Adds source register's value to destination register's value, to the resulting value adds a carry bit and puts the final result to destination register.
+- Example: addc r0, r1
+- Status flags affected: Can affect carry, zero and negative flags
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

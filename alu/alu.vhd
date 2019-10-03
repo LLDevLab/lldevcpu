@@ -70,6 +70,8 @@ begin
 				when rtrc =>
 					result_v := prev_carry_bit & dest_data;
 					result_v := rotate_right(result_v, shift_rotate_imm_v);
+				when addc =>
+					result_v := ('0' & dest_data) + ('0' & src_data) + ("00000000000000000000000000000000" & prev_carry_bit);
 				when others =>
 					result_v := (others => '0');
 					is_opcode_processed_v := '0';

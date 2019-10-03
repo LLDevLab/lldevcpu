@@ -12,7 +12,7 @@ package lldevcpu_pack is
 	constant negative_flag_pos: integer := 29;
 
 	type opcode is (noop, add, sub, br, breq, brne, brlts, brgts, brltu, brgtu, cmp, clr, ldi, or_op, and_op, xor_op, not_op, lsh,
-					rsh, rtl, rtr, rtlc, rtrc);
+					rsh, rtl, rtr, rtlc, rtrc, addc);
 	subtype rom_data is std_logic_vector(31 downto 0);
 	subtype reg_addr is integer range 0 to 15;
 	subtype rom_addr is std_logic_vector(rom_addr_msb_num downto 0);
