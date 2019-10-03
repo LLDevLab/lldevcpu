@@ -31,7 +31,7 @@ begin
 		variable is_opcode_processed_v: std_ulogic;
 		variable result_v: unsigned(32 downto 0) := (others => '0');
 		variable shift_rotate_imm_v: integer range 0 to 31;
-		variable prev_carry_bit: std_logic;
+		variable prev_carry_bit: std_logic := '0';
 	begin	
 		if(rising_edge(clk) and enable) then
 			is_opcode_processed_v := '1';
@@ -67,6 +67,9 @@ begin
 				when rtlc =>
 					result_v := prev_carry_bit & dest_data;
 					result_v := rotate_left(result_v, shift_rotate_imm_v);
+				when rtrc =>
+					result_v := prev_carry_bit & dest_data;
+					result_v := rotate_right(result_v, shift_rotate_imm_v);
 				when others =>
 					result_v := (others => '0');
 					is_opcode_processed_v := '0';
