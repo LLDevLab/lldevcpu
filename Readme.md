@@ -47,7 +47,7 @@ CPU have 2 stage pipeline:
 - Example: add r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
-### Sub instruction
+### Subtract instruction
 
 - Opcode: 000010
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
@@ -215,6 +215,14 @@ CPU have 2 stage pipeline:
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
 - Description: Adds source register's value to destination register's value, to the resulting value adds a carry bit and puts the final result to destination register.
 - Example: addc r0, r1
+- Status flags affected: Can affect carry, zero and negative flags
+
+### Subtract through carry bit instruction
+
+- Opcode: 011000
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
+- Description: Subtracts source register's value and a carry bit from destination register's value and puts the result to destination register.
+- Example: subc r0, r1
 - Status flags affected: Can affect carry, zero and negative flags
 
 ## Related software

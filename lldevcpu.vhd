@@ -100,7 +100,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = rtr or
 				op_code = rtlc or
 				op_code = rtrc or
-				op_code = addc);
+				op_code = addc or
+				op_code = subc);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -145,7 +146,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = sub or
 				op_code = cmp or
 				op_code = clr or
-				op_code = addc);
+				op_code = addc or
+				op_code = subc);
 	end function;
 	
 	function is_bitwise(op_code: opcode) return boolean is
