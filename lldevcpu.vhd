@@ -31,6 +31,14 @@ architecture lldevcpu_arch of lldevcpu is
 				q: out rom_data);
 	end component;
 	
+	component ram is
+		port(address: in std_logic_vector(9 downto 0);
+				clock: in std_logic;
+				data: in std_logic_vector(31 downto 0);
+				wren: in std_logic;
+				q: out std_logic_vector(31 downto 0));
+	end component;
+	
 	component instr_decoder is
 		port(clk: in std_logic; 
 			instruction: in rom_data; 
@@ -78,6 +86,12 @@ architecture lldevcpu_arch of lldevcpu is
 	signal uart_enable_s: boolean;
 	signal uart_ready_s: boolean;
 	signal bit_out_s: std_logic;
+	
+	-- RAM control signals
+	signal ram_data_in_s: ram_data := X"00000000";
+	signal ram_data_out_s: ram_data := X"00000000";
+	signal ram_addr_s: ram_addr := "0000000000";
+	signal ram_wr_en_s: std_logic := '0';
 	
 	-- status register flags aliases
 	alias sreg_carry_a: std_ulogic is reg_file_s(status_reg_addr)(carry_flag_pos);
@@ -183,6 +197,8 @@ begin
 	rom1: rom port map(std_logic_vector(reg_file_s(pc_reg_addr)(rom_addr_msb_num downto 0)),
 						sec_s,
 						rom_data_s);
+						
+	ram1: ram port map(ram_addr_s, sec_s, ram_data_in_s, ram_wr_en_s, ram_data_out_s);
 				
 	instr_decoder1: instr_decoder port map(sec_s,
 											instruction_s,
