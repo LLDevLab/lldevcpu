@@ -4,3 +4,7 @@ TODO.txt
 ROM/data.hex
 ROM/ROM.vhd
 *.bak
+*.odt#
+RAM/RAM.cmp
+RAM/RAM.qip
+RAM/RAM.vhd
