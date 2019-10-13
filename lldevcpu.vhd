@@ -181,6 +181,25 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = rtlc or
 				op_code = rtrc);
 	end function;
+	
+	function map_mem_addr(addr: std_logic_vector(31 downto 0)) return mem_type is
+		variable ret: mem_type;
+		alias mem_type_a: std_logic_vector(3 downto 0) is addr(31 downto 28);
+	begin
+
+		case mem_type_a is
+			when "0001" =>
+				ret := read_only_mem;
+			when "0010" =>
+				ret := rand_access_mem;
+			when "0011" =>
+				ret := peripherials;
+			when others =>
+				ret := unknown;
+		end case;
+	
+		return ret;
+	end function;
 begin
 	
 	sec_delay: clk_divider 
