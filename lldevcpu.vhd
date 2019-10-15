@@ -22,7 +22,7 @@ architecture lldevcpu_arch of lldevcpu is
 	end component;
 
 	type pipeline_status is (loading, running);
-	type execution_states is (decode, exec, write_back);
+	type execution_states is (decode, exec, write_back, waiting);
 	type regfile is array(0 to 15) of unsigned32;
 
 	component rom is
@@ -182,24 +182,30 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = rtrc);
 	end function;
 	
-	function map_mem_addr(addr: std_logic_vector(31 downto 0)) return mem_type is
-		variable ret: mem_type;
-		alias mem_type_a: std_logic_vector(3 downto 0) is addr(31 downto 28);
+	-- is memory operation
+	function is_mem_op(op_code: opcode) return boolean is
+	begin
+		return (op_code = ld);
+	end function;
+	
+	procedure map_mem_addr(orig_addr: in unsigned(31 downto 0); 
+							mapped_addr: out std_logic_vector(31 downto 0);
+							memory_type: out mem_type) is
+		alias mem_type_a: unsigned(3 downto 0) is orig_addr(31 downto 28);
 	begin
 
 		case mem_type_a is
 			when "0001" =>
-				ret := read_only_mem;
+				memory_type := read_only_mem;
 			when "0010" =>
-				ret := rand_access_mem;
-			when "0011" =>
-				ret := peripherials;
+				memory_type := rand_access_mem;
 			when others =>
-				ret := unknown;
+				memory_type := unknown;
 		end case;
-	
-		return ret;
-	end function;
+		
+		mapped_addr := "0000" & std_logic_vector(orig_addr(27 downto 0));
+		
+	end map_mem_addr;
 begin
 	
 	sec_delay: clk_divider 
@@ -253,6 +259,12 @@ begin
 		variable next_pc_value: unsigned32 := X"00000000";
 		variable alu_enable_v: boolean;
 		variable need_write_back_v: boolean;
+		variable memory_type_v: mem_type;
+		variable mapped_addr_v: std_logic_vector(31 downto 0);
+		variable origin_addr_v: unsigned(31 downto 0);
+		variable next_exec_state_v: execution_states;
+		variable return_exec_state: execution_states;
+		variable waiting_count_v: integer range 0 to 10 := 0;
 	begin
 		if(falling_edge(sec_s)) then
 			alu_enable_v := false;
@@ -263,14 +275,16 @@ begin
 				when running =>
 					case cur_exec_state_s is
 						when decode =>
+							next_exec_state_v := exec;
 							next_pc_value := reg_file_s(pc_reg_addr);
 							next_pc_value := next_pc_value + 1;
 								
 							reg_file_s(pc_reg_addr) <= next_pc_value;
 							
 							instruction_s <= rom_data_s;
-							cur_exec_state_s <= exec;
+							cur_exec_state_s <= next_exec_state_v;
 						when exec =>
+							next_exec_state_v := write_back;
 							need_write_back_v := need_writeback(opcode_s);
 							
 							if(is_arithmetic(opcode_s) or is_bitwise(opcode_s)) then							
@@ -285,21 +299,58 @@ begin
 								alu_dest_val_s <= reg_file_s(dest_reg_addr_s);
 								alu_src_val_s <= "000000000000000000000000000" & immediate_val_s(4 downto 0);
 								alu_enable_v := true;
+							elsif(is_mem_op(opcode_s)) then
+								case opcode_s is
+									when ld =>
+										origin_addr_v := reg_file_s(src_reg_addr_s);
+										map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);
+										waiting_count_v := 2;
+										next_exec_state_v := waiting;
+										return_exec_state := write_back;
+									when others =>
+										null;
+								end case;
+
+								case memory_type_v is
+									when rand_access_mem =>
+										ram_addr_s <= mapped_addr_v(9 downto 0);										
+									when read_only_mem =>
+										null;	-- TODO: implement rom data reading
+									when others =>
+										null;
+								end case;	
 							end if;
 														
-							cur_exec_state_s <= write_back;
+							cur_exec_state_s <= next_exec_state_v;
 						when write_back =>
+							next_exec_state_v := decode;
+						
 							if(need_write_back_v) then
 								if(opcode_s = ldi) then
 									reg_file_s(dest_reg_addr_s) <= "0000000000" & immediate_val_s;
 								else
 									reg_file_s(dest_reg_addr_s) <= alu_result_s;
 								end if;
+							elsif(opcode_s = ld) then
+								case memory_type_v is
+									when rand_access_mem =>
+										reg_file_s(dest_reg_addr_s)	<= unsigned(ram_data_out_s);
+									when others =>
+										null;
+								end case; 		
 							end if;
 							
 							reg_file_s(status_reg_addr) <= alu_sreg_val_s;
-							cur_exec_state_s <= decode;
+							cur_exec_state_s <= next_exec_state_v;
+						
+						when waiting =>
+							if(waiting_count_v >= 1) then
+								waiting_count_v := waiting_count_v - 1;
+							else
+								next_exec_state_v := return_exec_state;
+							end if;
 							
+							cur_exec_state_s <= next_exec_state_v;
 						when others =>
 							null;
 					end case;
