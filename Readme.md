@@ -229,7 +229,7 @@ CPU have 2 stage pipeline:
 
 - Opcode: 011001
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
-- Description: Loads data from memory address, that is stored in source register (rs), to destination register (rd).
+- Description: Loads data from memory address (that is stored in source register (rs)), to destination register (rd).
 - Example: ld r0, r1
 - Status flags affected: Flags are not affected
 
