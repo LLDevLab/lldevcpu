@@ -62,6 +62,7 @@ architecture lldevcpu_arch of lldevcpu is
 		
 	-- ROM control signals
 	signal rom_data_s: rom_data := X"00000000";
+	signal rom_addr_s: rom_addr := "000000000000"; 
 	
 	-- Decoder control signals
 	signal instruction_s: rom_data := X"00000000";
@@ -219,7 +220,7 @@ begin
 	uart_transmit: uat
 				port map(clk_uart, uart_enable_s, std_logic_vector(reg_file_s(0)(7 downto 0)), bit_out_s, uart_ready_s);	
 
-	rom1: rom port map(std_logic_vector(reg_file_s(pc_reg_addr)(rom_addr_msb_num downto 0)),
+	rom1: rom port map(rom_addr_s ,
 						sec_s,
 						rom_data_s);
 						
@@ -280,6 +281,7 @@ begin
 							next_pc_value := next_pc_value + 1;
 								
 							reg_file_s(pc_reg_addr) <= next_pc_value;
+							rom_addr_s <= std_logic_vector(next_pc_value(rom_addr_msb_num downto 0));
 							
 							instruction_s <= rom_data_s;
 							cur_exec_state_s <= next_exec_state_v;
@@ -303,7 +305,7 @@ begin
 								case opcode_s is
 									when ld =>
 										origin_addr_v := reg_file_s(src_reg_addr_s);
-										map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);
+										map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);	
 										waiting_count_v := 2;
 										next_exec_state_v := waiting;
 										return_exec_state := write_back;
@@ -313,9 +315,9 @@ begin
 
 								case memory_type_v is
 									when rand_access_mem =>
-										ram_addr_s <= mapped_addr_v(9 downto 0);										
+										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);										
 									when read_only_mem =>
-										null;	-- TODO: implement rom data reading
+										rom_addr_s <= mapped_addr_v(rom_addr_msb_num downto 0);
 									when others =>
 										null;
 								end case;	
@@ -335,6 +337,8 @@ begin
 								case memory_type_v is
 									when rand_access_mem =>
 										reg_file_s(dest_reg_addr_s)	<= unsigned(ram_data_out_s);
+									when read_only_mem =>
+										reg_file_s(dest_reg_addr_s) <= unsigned(rom_data_s);
 									when others =>
 										null;
 								end case; 		
@@ -347,6 +351,10 @@ begin
 							if(waiting_count_v >= 1) then
 								waiting_count_v := waiting_count_v - 1;
 							else
+								if(memory_type_v = read_only_mem) then
+									rom_addr_s <= std_logic_vector(next_pc_value(rom_addr_msb_num downto 0));
+								end if;
+								
 								next_exec_state_v := return_exec_state;
 							end if;
 							
