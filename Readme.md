@@ -233,6 +233,14 @@ CPU have 2 stage pipeline:
 - Example: ld r0, r1
 - Status flags affected: Flags are not affected
 
+### Store to memory address instruction
+
+- Opcode: 011010
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address and bits 21 – 18 are source registers address. Other bits are reserved.
+- Description: Store data from source register (rs) to memory address (that is stored in destination register (rd)).
+- Example: st r0, r1
+- Status flags affected: Flags are not affected
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

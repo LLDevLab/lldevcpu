@@ -116,7 +116,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = rtlc or
 				op_code = rtrc or
 				op_code = addc or
-				op_code = subc);
+				op_code = subc or
+				op_code = ld);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -186,7 +187,8 @@ architecture lldevcpu_arch of lldevcpu is
 	-- is memory operation
 	function is_mem_op(op_code: opcode) return boolean is
 	begin
-		return (op_code = ld);
+		return (op_code = ld or
+				op_code = st);
 	end function;
 	
 	procedure map_mem_addr(orig_addr: in unsigned(31 downto 0); 
@@ -266,6 +268,7 @@ begin
 		variable next_exec_state_v: execution_states;
 		variable return_exec_state: execution_states;
 		variable waiting_count_v: integer range 0 to 10 := 0;
+		variable ram_wr_en_v: std_logic := '0';
 	begin
 		if(falling_edge(sec_s)) then
 			alu_enable_v := false;
@@ -286,6 +289,7 @@ begin
 							instruction_s <= rom_data_s;
 							cur_exec_state_s <= next_exec_state_v;
 						when exec =>
+							ram_wr_en_v := '0';
 							next_exec_state_v := write_back;
 							need_write_back_v := need_writeback(opcode_s);
 							
@@ -308,7 +312,13 @@ begin
 										map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);	
 										waiting_count_v := 2;
 										next_exec_state_v := waiting;
-										return_exec_state := write_back;
+										return_exec_state := write_back;										
+									when st =>
+										origin_addr_v := reg_file_s(dest_reg_addr_s);
+										map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);
+										ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));
+										next_exec_state_v := write_back;
+										ram_wr_en_v := '1';
 									when others =>
 										null;
 								end case;
@@ -320,9 +330,10 @@ begin
 										rom_addr_s <= mapped_addr_v(rom_addr_msb_num downto 0);
 									when others =>
 										null;
-								end case;	
+								end case;								
 							end if;
-														
+							
+							ram_wr_en_s <= ram_wr_en_v;
 							cur_exec_state_s <= next_exec_state_v;
 						when write_back =>
 							next_exec_state_v := decode;
@@ -330,18 +341,18 @@ begin
 							if(need_write_back_v) then
 								if(opcode_s = ldi) then
 									reg_file_s(dest_reg_addr_s) <= "0000000000" & immediate_val_s;
+								elsif(opcode_s = ld) then
+									case memory_type_v is
+										when rand_access_mem =>
+											reg_file_s(dest_reg_addr_s)	<= unsigned(ram_data_out_s);
+										when read_only_mem =>
+											reg_file_s(dest_reg_addr_s) <= unsigned(rom_data_s);
+										when others =>
+											null;
+									end case; 
 								else
 									reg_file_s(dest_reg_addr_s) <= alu_result_s;
 								end if;
-							elsif(opcode_s = ld) then
-								case memory_type_v is
-									when rand_access_mem =>
-										reg_file_s(dest_reg_addr_s)	<= unsigned(ram_data_out_s);
-									when read_only_mem =>
-										reg_file_s(dest_reg_addr_s) <= unsigned(rom_data_s);
-									when others =>
-										null;
-								end case; 		
 							end if;
 							
 							reg_file_s(status_reg_addr) <= alu_sreg_val_s;
