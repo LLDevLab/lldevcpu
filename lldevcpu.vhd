@@ -269,6 +269,7 @@ begin
 		variable return_exec_state: execution_states;
 		variable waiting_count_v: integer range 0 to 10 := 0;
 		variable ram_wr_en_v: std_logic := '0';
+		variable rom_data_v: rom_data := X"00000000";
 	begin
 		if(falling_edge(sec_s)) then
 			alu_enable_v := false;
@@ -300,6 +301,7 @@ begin
 							elsif(is_branch(opcode_s)) then
 								if(need_branch(opcode_s, sreg_carry_a, sreg_zero_a, sreg_negative_a)) then
 									reg_file_s(pc_reg_addr) <= reg_file_s(src_reg_addr_s);
+									rom_addr_s <= std_logic_vector(reg_file_s(src_reg_addr_s)(rom_addr_msb_num downto 0));
 								end if;	
 							elsif(is_shift_rotate(opcode_s)) then
 								alu_dest_val_s <= reg_file_s(dest_reg_addr_s);
@@ -310,7 +312,7 @@ begin
 									when ld =>
 										origin_addr_v := reg_file_s(src_reg_addr_s);
 										map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);	
-										waiting_count_v := 2;
+										waiting_count_v := 1;
 										next_exec_state_v := waiting;
 										return_exec_state := write_back;										
 									when st =>
@@ -346,7 +348,7 @@ begin
 										when rand_access_mem =>
 											reg_file_s(dest_reg_addr_s)	<= unsigned(ram_data_out_s);
 										when read_only_mem =>
-											reg_file_s(dest_reg_addr_s) <= unsigned(rom_data_s);
+											reg_file_s(dest_reg_addr_s) <= unsigned(rom_data_v);
 										when others =>
 											null;
 									end case; 
@@ -363,6 +365,7 @@ begin
 								waiting_count_v := waiting_count_v - 1;
 							else
 								if(memory_type_v = read_only_mem) then
+									rom_data_v := rom_data_s;
 									rom_addr_s <= std_logic_vector(next_pc_value(rom_addr_msb_num downto 0));
 								end if;
 								
