@@ -184,13 +184,6 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = rtrc);
 	end function;
 	
-	-- is memory operation
-	function is_mem_op(op_code: opcode) return boolean is
-	begin
-		return (op_code = ld or
-				op_code = st);
-	end function;
-	
 	procedure map_mem_addr(orig_addr: in unsigned(31 downto 0); 
 							mapped_addr: out std_logic_vector(31 downto 0);
 							memory_type: out mem_type) is
@@ -307,24 +300,13 @@ begin
 								alu_dest_val_s <= reg_file_s(dest_reg_addr_s);
 								alu_src_val_s <= "000000000000000000000000000" & immediate_val_s(4 downto 0);
 								alu_enable_v := true;
-							elsif(is_mem_op(opcode_s)) then
-								case opcode_s is
-									when ld =>
-										origin_addr_v := reg_file_s(src_reg_addr_s);
-										map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);	
-										waiting_count_v := 1;
-										next_exec_state_v := waiting;
-										return_exec_state := write_back;										
-									when st =>
-										origin_addr_v := reg_file_s(dest_reg_addr_s);
-										map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);
-										ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));
-										next_exec_state_v := write_back;
-										ram_wr_en_v := '1';
-									when others =>
-										null;
-								end case;
-
+							elsif(opcode_s = ld) then
+								origin_addr_v := reg_file_s(src_reg_addr_s);
+								map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);	
+								waiting_count_v := 1;
+								next_exec_state_v := waiting;
+								return_exec_state := write_back;
+								
 								case memory_type_v is
 									when rand_access_mem =>
 										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);										
@@ -332,7 +314,17 @@ begin
 										rom_addr_s <= mapped_addr_v(rom_addr_msb_num downto 0);
 									when others =>
 										null;
-								end case;								
+								end case;
+							elsif(opcode_s = st) then
+								origin_addr_v := reg_file_s(dest_reg_addr_s);
+								map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);
+								
+								if(memory_type_v = rand_access_mem) then
+									ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));									
+									ram_wr_en_v := '1';
+								end if;
+								
+								next_exec_state_v := write_back;
 							end if;
 							
 							ram_wr_en_s <= ram_wr_en_v;
