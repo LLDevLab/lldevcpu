@@ -28,6 +28,20 @@ CPU have 2 stage pipeline:
 	- Indicate whether or not operation result is zero. If result of operation is equal to 0, than flag is set, otherwise flag is clear.
 - Bit 29 - Negative flag 
 	- Indicate whether or not operation result is negative. Flag is set if MSB of the result is set, otherwise flag is clear.
+	
+## Memory mapping
+
+### ROM memory 
+
+ROM memory are mapped to addresses starting from 0x10000000.
+
+### RAM memory
+
+RAM memory are mapped to addresses starting from 0x20000000.
+
+### Peripherials
+
+Peripherial registers are mapped to addresses starting from 0x30000000.
 
 ## Supported Instructions
 
