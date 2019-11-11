@@ -41,7 +41,7 @@ RAM memory mapped to addresses starting from 0x20000000.
 
 ### Peripherials
 
-Peripherial registers are mapped to addresses starting from 0x30000000.
+Peripherial registers mapped to addresses starting from 0x30000000.
 
 ## Supported Instructions
 
