@@ -33,11 +33,11 @@ CPU have 2 stage pipeline:
 
 ### ROM memory 
 
-ROM memory are mapped to addresses starting from 0x10000000.
+ROM memory mapped to addresses starting from 0x10000000.
 
 ### RAM memory
 
-RAM memory are mapped to addresses starting from 0x20000000.
+RAM memory mapped to addresses starting from 0x20000000.
 
 ### Peripherials
 
