@@ -43,6 +43,16 @@ RAM memory mapped to addresses starting from 0x20000000.
 
 Peripherial registers mapped to addresses starting from 0x30000000.
 
+#### UART Setup register
+
+- 16 bit register to set up UART interface
+- Offset: 0x0000
+- Bit 15: Transmitter enable bit
+
+### UART data output register
+- 16 bit register to store outgoing data
+- Offset: 0x0001
+
 ## Supported Instructions
 
 ### Noop instruction

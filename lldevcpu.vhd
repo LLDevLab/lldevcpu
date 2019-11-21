@@ -17,13 +17,10 @@ architecture lldevcpu_arch of lldevcpu is
 		port(clk: in std_logic; out_s: out std_logic := '0');
 	end component;
 
-	component uat is		-- universal asynchronous transmitter
-		port(clk: in std_logic; enable: in boolean; data: in std_logic_vector(0 to 7); bit_out: out std_logic; ready: buffer boolean);
-	end component;
-
 	type pipeline_status is (loading, running);
 	type execution_states is (decode, exec, write_back, waiting);
 	type regfile is array(0 to 15) of unsigned32;
+	type periph_reg_file is array(0 to 2) of unsigned16;
 
 	component rom is
 		port(address: in rom_addr; 
@@ -57,8 +54,23 @@ architecture lldevcpu_arch of lldevcpu is
 			sreg: out unsigned32);
 	end component;
 	
+	component uart is
+		port(clk: in std_logic; 
+			data_out: in std_logic_vector(7 downto 0);		
+			--bit_in: in std_logic;							
+			settings: in unsigned16;
+			--rx_start_s: boolean;
+			tx_start_s: boolean;
+			--data_in: out std_logic_vector(7 downto 0);		
+			bit_out: out std_logic;							
+			--rx_ready: buffer boolean;
+			tx_ready: buffer boolean);
+	end component;
+	
 	signal reg_file_s: regfile := (X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
+											
+	signal periph_reg_file_s: periph_reg_file := (X"0000", X"0000", X"0000");
 		
 	-- ROM control signals
 	signal rom_data_s: rom_data := X"00000000";
@@ -83,16 +95,23 @@ architecture lldevcpu_arch of lldevcpu is
 	signal cur_exec_state_s: execution_states;
 	
 	-- UART control signals 
-	signal clk_uart: std_logic := '0';
-	signal uart_enable_s: boolean;
-	signal uart_ready_s: boolean;
-	signal bit_out_s: std_logic;
+	signal uart_clk: std_logic := '0';
+	signal uart_tx_enable_s: boolean;
+	signal uart_rx_enable_s: boolean;
+	signal uart_rx_ready_s: boolean;
+	signal uart_tx_ready_s: boolean;
+	signal uart_bit_out_s: std_logic;
+	signal uart_bit_in_s: std_logic;
+	--signal uart_data_in_s: std_logic_vector(7 downto 0);
 	
 	-- RAM control signals
 	signal ram_data_in_s: ram_data := X"00000000";
 	signal ram_data_out_s: ram_data := X"00000000";
 	signal ram_addr_s: ram_addr := "0000000000";
 	signal ram_wr_en_s: std_logic := '0';
+	
+	-- Peripherials control signals
+	signal periph_addr_s: periph_addr := "000";
 	
 	-- status register flags aliases
 	alias sreg_carry_a: std_ulogic is reg_file_s(status_reg_addr)(carry_flag_pos);
@@ -195,6 +214,8 @@ architecture lldevcpu_arch of lldevcpu is
 				memory_type := read_only_mem;
 			when "0010" =>
 				memory_type := rand_access_mem;
+			when "0011" =>
+				memory_type := peripherials;
 			when others =>
 				memory_type := unknown;
 		end case;
@@ -210,12 +231,9 @@ begin
 				
 	uart_delay: clk_divider
 				generic map(2_604)	
-				port map(clk, clk_uart);
-				
-	uart_transmit: uat
-				port map(clk_uart, uart_enable_s, std_logic_vector(reg_file_s(0)(7 downto 0)), bit_out_s, uart_ready_s);	
+				port map(clk, uart_clk);	
 
-	rom1: rom port map(rom_addr_s ,
+	rom1: rom port map(rom_addr_s,
 						sec_s,
 						rom_data_s);
 						
@@ -236,20 +254,32 @@ begin
 						alu_result_s,
 						alu_sreg_val_s);
 						
-	bit_out <= bit_out_s;
+	uart1: uart port map(uart_clk,
+							std_logic_vector(periph_reg_file_s(uart_data_out_reg_idx)(7 downto 0)),
+							--uart_bit_in_s,
+							periph_reg_file_s(uart_settings_reg_idx),
+							--uart_rx_enable_s,
+							uart_tx_enable_s,
+							--uart_data_in_s,
+							uart_bit_out_s,
+							--uart_rx_ready_s,
+							uart_tx_ready_s);
+	--periph_reg_file_s(uart_data_in_reg_idx)(7 downto 0) <= unsigned(uart_data_in_s);									
+						
+	bit_out <= uart_bit_out_s;
 	
-	uart_process: process(clk_uart, reg_file_s(0), uart_ready_s)
-		variable tmp_reg_val: unsigned32 := reg_file_s(0);
+	uart_tx_process: process(uart_clk, periph_reg_file_s(uart_data_out_reg_idx), uart_tx_ready_s)
+		variable tmp_reg_val: unsigned16 := periph_reg_file_s(uart_data_out_reg_idx);
 	begin
-		if(falling_edge(clk_uart)) then
-			if(tmp_reg_val = reg_file_s(0)) then
-				uart_enable_s <= false;
+		if(falling_edge(uart_clk)) then
+			if(tmp_reg_val = periph_reg_file_s(uart_data_out_reg_idx)) then
+				uart_tx_enable_s <= false;
 			else
-				uart_enable_s <= uart_ready_s;
+				uart_tx_enable_s <= uart_tx_ready_s;
 			end if;
-			tmp_reg_val := reg_file_s(0);
+			tmp_reg_val := periph_reg_file_s(uart_data_out_reg_idx);
 		end if;
-	end process uart_process;
+	end process uart_tx_process;
 	
 	exec_proc: process(sec_s)
 		variable next_pc_value: unsigned32 := X"00000000";
@@ -263,6 +293,7 @@ begin
 		variable waiting_count_v: integer range 0 to 10 := 0;
 		variable ram_wr_en_v: std_logic := '0';
 		variable rom_data_v: rom_data := X"00000000";
+		variable periph_addr_v: periph_addr := "000";
 	begin
 		if(falling_edge(sec_s)) then
 			alu_enable_v := false;
@@ -312,6 +343,8 @@ begin
 										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);										
 									when read_only_mem =>
 										rom_addr_s <= mapped_addr_v(rom_addr_msb_num downto 0);
+									when peripherials =>
+										periph_addr_v := mapped_addr_v(periph_addr_msb_num downto 0);
 									when others =>
 										null;
 								end case;
@@ -319,14 +352,21 @@ begin
 								origin_addr_v := reg_file_s(dest_reg_addr_s);
 								map_mem_addr(origin_addr_v, mapped_addr_v, memory_type_v);
 								
-								if(memory_type_v = rand_access_mem) then
-									ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));									
-									ram_wr_en_v := '1';
-								end if;
+								case memory_type_v is
+									when rand_access_mem =>
+										ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));									
+										ram_wr_en_v := '1';
+									when peripherials =>
+										periph_addr_v := mapped_addr_v(periph_addr_msb_num downto 0);
+										periph_reg_file_s(to_integer(unsigned(periph_addr_v))) <= reg_file_s(src_reg_addr_s)(15 downto 0);										
+									when others =>
+										null;
+								end case;
 								
 								next_exec_state_v := write_back;
 							end if;
 							
+							periph_addr_s <= periph_addr_v;
 							ram_wr_en_s <= ram_wr_en_v;
 							cur_exec_state_s <= next_exec_state_v;
 						when write_back =>
@@ -341,6 +381,8 @@ begin
 											reg_file_s(dest_reg_addr_s)	<= unsigned(ram_data_out_s);
 										when read_only_mem =>
 											reg_file_s(dest_reg_addr_s) <= unsigned(rom_data_v);
+										when peripherials =>
+											reg_file_s(dest_reg_addr_s) <= X"0000" & periph_reg_file_s(to_integer(unsigned(periph_addr_s))); 
 										when others =>
 											null;
 									end case; 
