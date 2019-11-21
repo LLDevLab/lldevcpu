@@ -49,7 +49,7 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - Offset: 0x0000
 - Bit 15: Transmitter enable bit
 
-### UART data output register
+#### UART data output register
 - 16 bit register to store outgoing data
 - Offset: 0x0001
 
