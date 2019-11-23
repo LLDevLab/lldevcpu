@@ -17,6 +17,8 @@ package lldevcpu_pack is
 	constant uart_settings_reg_idx: integer := 0;
 	constant uart_data_out_reg_idx: integer := 1;
 	constant uart_data_in_reg_idx: integer := 2;
+	
+	constant uart_max_baud_rate_divider: integer := 2_604;
 
 	type opcode is (noop, add, sub, br, breq, brne, brlts, brgts, brltu, brgtu, cmp, clr, ldi, or_op, and_op, xor_op, not_op, lsh,
 					rsh, rtl, rtr, rtlc, rtrc, addc, subc, ld, st);
@@ -31,4 +33,5 @@ package lldevcpu_pack is
 	subtype unsigned32 is unsigned(31 downto 0);
 	subtype unsigned22 is unsigned(21 downto 0);
 	subtype unsigned16 is unsigned(15 downto 0);
+	subtype baud_rate is integer range 108 to uart_max_baud_rate_divider;
 end lldevcpu_pack;

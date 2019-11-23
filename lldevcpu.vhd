@@ -56,14 +56,11 @@ architecture lldevcpu_arch of lldevcpu is
 	
 	component uart is
 		port(clk: in std_logic; 
-			data_out: in std_logic_vector(7 downto 0);		
-			--bit_in: in std_logic;							
+			data_out: in std_logic_vector(7 downto 0);									
 			settings: in unsigned16;
-			--rx_start_s: boolean;
-			tx_start_s: boolean;
-			--data_in: out std_logic_vector(7 downto 0);		
-			bit_out: out std_logic;							
-			--rx_ready: buffer boolean;
+			tx_start_s: boolean;		
+			bit_out: out std_logic;
+			uart_clk: out std_logic;			
 			tx_ready: buffer boolean);
 	end component;
 	
@@ -94,15 +91,14 @@ architecture lldevcpu_arch of lldevcpu is
 	signal pipeline_status_s: pipeline_status;
 	signal cur_exec_state_s: execution_states;
 	
-	-- UART control signals 
-	signal uart_clk: std_logic := '0';
+	-- UART control signals
+	signal uart_clk_out_s: std_logic;
 	signal uart_tx_enable_s: boolean;
 	signal uart_rx_enable_s: boolean;
 	signal uart_rx_ready_s: boolean;
 	signal uart_tx_ready_s: boolean;
 	signal uart_bit_out_s: std_logic;
 	signal uart_bit_in_s: std_logic;
-	--signal uart_data_in_s: std_logic_vector(7 downto 0);
 	
 	-- RAM control signals
 	signal ram_data_in_s: ram_data := X"00000000";
@@ -227,11 +223,7 @@ begin
 	
 	sec_delay: clk_divider 
 				generic map(25_000_000)	
-				port map(clk, sec_s);
-				
-	uart_delay: clk_divider
-				generic map(2_604)	
-				port map(clk, uart_clk);	
+				port map(clk, sec_s);	
 
 	rom1: rom port map(rom_addr_s,
 						sec_s,
@@ -254,24 +246,20 @@ begin
 						alu_result_s,
 						alu_sreg_val_s);
 						
-	uart1: uart port map(uart_clk,
+	uart1: uart port map(clk,
 							std_logic_vector(periph_reg_file_s(uart_data_out_reg_idx)(7 downto 0)),
-							--uart_bit_in_s,
 							periph_reg_file_s(uart_settings_reg_idx),
-							--uart_rx_enable_s,
 							uart_tx_enable_s,
-							--uart_data_in_s,
 							uart_bit_out_s,
-							--uart_rx_ready_s,
-							uart_tx_ready_s);
-	--periph_reg_file_s(uart_data_in_reg_idx)(7 downto 0) <= unsigned(uart_data_in_s);									
+							uart_clk_out_s,
+							uart_tx_ready_s);									
 						
 	bit_out <= uart_bit_out_s;
 	
-	uart_tx_process: process(uart_clk, periph_reg_file_s(uart_data_out_reg_idx), uart_tx_ready_s)
+	uart_tx_process: process(uart_clk_out_s, periph_reg_file_s(uart_data_out_reg_idx), uart_tx_ready_s)
 		variable tmp_reg_val: unsigned16 := periph_reg_file_s(uart_data_out_reg_idx);
 	begin
-		if(falling_edge(uart_clk)) then
+		if(falling_edge(uart_clk_out_s)) then
 			if(tmp_reg_val = periph_reg_file_s(uart_data_out_reg_idx)) then
 				uart_tx_enable_s <= false;
 			else

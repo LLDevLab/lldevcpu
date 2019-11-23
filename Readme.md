@@ -48,7 +48,17 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - 16 bit register to set up UART interface
 - Offset: 0x0000
 - Bit 15: Transmitter enable bit
-
+- Bit 14: Receiver enable bit
+- Bits 13 - 11: Boud rate (at 50Mhz clock):
+	- 000 - 9600
+	- 001 - reserved
+	- 010 - reserved
+	- 011 - reserved
+	- 100 - reserved
+	- 101 - reserved
+	- 110 - 115200
+	- 111 - reserved
+	
 #### UART data output register
 - 16 bit register to store outgoing data
 - Offset: 0x0001
