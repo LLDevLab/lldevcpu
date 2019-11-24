@@ -132,7 +132,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = rtrc or
 				op_code = addc or
 				op_code = subc or
-				op_code = ld);
+				op_code = ld or
+				op_code = mov);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -223,7 +224,7 @@ begin
 	
 	sec_delay: clk_divider 
 				generic map(25_000_000)	
-				port map(clk, sec_s);	
+				port map(clk, sec_s);
 
 	rom1: rom port map(rom_addr_s,
 						sec_s,
@@ -351,7 +352,7 @@ begin
 										null;
 								end case;
 								
-								next_exec_state_v := write_back;
+								next_exec_state_v := write_back;								
 							end if;
 							
 							periph_addr_s <= periph_addr_v;
@@ -373,7 +374,9 @@ begin
 											reg_file_s(dest_reg_addr_s) <= X"0000" & periph_reg_file_s(to_integer(unsigned(periph_addr_s))); 
 										when others =>
 											null;
-									end case; 
+									end case;
+								elsif(opcode_s = mov) then
+									reg_file_s(dest_reg_addr_s) <= reg_file_s(src_reg_addr_s);
 								else
 									reg_file_s(dest_reg_addr_s) <= alu_result_s;
 								end if;

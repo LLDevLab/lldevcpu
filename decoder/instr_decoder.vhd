@@ -142,6 +142,10 @@ begin
 					instr_opcode <= st;	-- store to memory location
 					src_reg_addr_v := to_integer(unsigned(src_reg_addr_s));
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+				when "011011" =>
+					instr_opcode <= mov;
+					src_reg_addr_v := to_integer(unsigned(src_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;
