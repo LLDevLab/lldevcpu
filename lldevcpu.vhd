@@ -65,7 +65,7 @@ architecture lldevcpu_arch of lldevcpu is
 	end component;
 	
 	signal reg_file_s: regfile := (X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
-											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000"); 
+											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", top_of_stack, X"00000000"); 
 											
 	signal periph_reg_file_s: periph_reg_file := (X"0000", X"0000", X"0000");
 		
@@ -200,6 +200,11 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = rtrc);
 	end function;
 	
+	function is_stack_op(op_code: opcode) return boolean is
+	begin
+		return (op_code = push);
+	end function;
+	
 	procedure map_mem_addr(orig_addr: in unsigned(31 downto 0); 
 							mapped_addr: out std_logic_vector(31 downto 0);
 							memory_type: out mem_type) is
@@ -283,6 +288,7 @@ begin
 		variable ram_wr_en_v: std_logic := '0';
 		variable rom_data_v: rom_data := X"00000000";
 		variable periph_addr_v: periph_addr := "000";
+		variable stack_ptr_val_v: unsigned32 := X"00000000";
 	begin
 		if(falling_edge(sec_s)) then
 			alu_enable_v := false;
@@ -352,7 +358,18 @@ begin
 										null;
 								end case;
 								
-								next_exec_state_v := write_back;								
+								next_exec_state_v := write_back;
+							elsif(is_stack_op(opcode_s)) then
+								stack_ptr_val_v := reg_file_s(stack_ptr_reg_addr);
+								ram_addr_s <= std_logic_vector(stack_ptr_val_v(ram_addr_msb_num downto 0));
+								
+								if(opcode_s = push) then
+									ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));
+									ram_wr_en_v := '1';
+									stack_ptr_val_v := stack_ptr_val_v - 1;									
+								end if;
+																
+								reg_file_s(stack_ptr_reg_addr) <= stack_ptr_val_v;
 							end if;
 							
 							periph_addr_s <= periph_addr_v;

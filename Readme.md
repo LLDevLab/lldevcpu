@@ -283,6 +283,14 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - Example: mov r0, r1
 - Status flags affected: Flags are not affected
 
+### Push instruction
+
+- Opcode: 011100
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. Other bits are reserved.
+- Description: Store the content of source register (rs) to the top of the stack.
+- Example: push r0
+- Status flags affected: Flags are not affected
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)
