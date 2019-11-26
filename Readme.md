@@ -295,7 +295,7 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 
 - Opcode: 011101
 - Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are register's address. Other bits are reserved.
-- Description: Store the content of register to the top of the stack.
+- Description: Load content from the top of the stack to the register.
 - Example: pop r0
 - Status flags affected: Flags are not affected
 
