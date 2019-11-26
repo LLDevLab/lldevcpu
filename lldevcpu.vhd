@@ -229,11 +229,9 @@ architecture lldevcpu_arch of lldevcpu is
 	end map_mem_addr;
 begin
 	
-	--sec_delay: clk_divider 
-	--			generic map(25_000_000)	
-	--			port map(clk, sec_s);
-	
-	sec_s <= not sec_s after 5 ns;
+	sec_delay: clk_divider 
+				generic map(25_000_000)	
+				port map(clk, sec_s);
 
 	rom1: rom port map(rom_addr_s,
 						sec_s,
