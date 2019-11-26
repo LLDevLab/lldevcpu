@@ -39,5 +39,5 @@ package lldevcpu_pack is
 	subtype unsigned16 is unsigned(15 downto 0);
 	subtype baud_rate is integer range 108 to uart_max_baud_rate_divider;
 	
-	constant top_of_stack: unsigned32 := X"000003ff";
+	constant top_of_stack: unsigned32 := X"000002ff";
 end lldevcpu_pack;
