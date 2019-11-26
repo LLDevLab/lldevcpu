@@ -148,8 +148,12 @@ begin
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when "011100" =>
 					instr_opcode <= push;
-					src_reg_addr_v := to_integer(unsigned(src_reg_addr_s));
-					dest_reg_addr_v := to_integer(unsigned(src_reg_addr_s));
+					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+				when "011101" =>
+					instr_opcode <= pop;
+					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 				when others =>
 					instr_opcode <= noop;
 			end case;

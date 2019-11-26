@@ -286,9 +286,17 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 ### Push instruction
 
 - Opcode: 011100
-- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are source register's address. Other bits are reserved.
-- Description: Store the content of source register (rs) to the top of the stack.
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are register's address. Other bits are reserved.
+- Description: Store the content of register to the top of the stack.
 - Example: push r0
+- Status flags affected: Flags are not affected
+
+### Pop instruction
+
+- Opcode: 011101
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are register's address. Other bits are reserved.
+- Description: Store the content of register to the top of the stack.
+- Example: pop r0
 - Status flags affected: Flags are not affected
 
 ## Related software

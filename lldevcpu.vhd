@@ -133,7 +133,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = addc or
 				op_code = subc or
 				op_code = ld or
-				op_code = mov);
+				op_code = mov or
+				op_code = pop);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -202,7 +203,8 @@ architecture lldevcpu_arch of lldevcpu is
 	
 	function is_stack_op(op_code: opcode) return boolean is
 	begin
-		return (op_code = push);
+		return (op_code = push or
+				op_code = pop);
 	end function;
 	
 	procedure map_mem_addr(orig_addr: in unsigned(31 downto 0); 
@@ -227,9 +229,11 @@ architecture lldevcpu_arch of lldevcpu is
 	end map_mem_addr;
 begin
 	
-	sec_delay: clk_divider 
-				generic map(25_000_000)	
-				port map(clk, sec_s);
+	--sec_delay: clk_divider 
+	--			generic map(25_000_000)	
+	--			port map(clk, sec_s);
+	
+	sec_s <= not sec_s after 5 ns;
 
 	rom1: rom port map(rom_addr_s,
 						sec_s,
@@ -360,13 +364,19 @@ begin
 								
 								next_exec_state_v := write_back;
 							elsif(is_stack_op(opcode_s)) then
-								stack_ptr_val_v := reg_file_s(stack_ptr_reg_addr);
-								ram_addr_s <= std_logic_vector(stack_ptr_val_v(ram_addr_msb_num downto 0));
+								stack_ptr_val_v := reg_file_s(stack_ptr_reg_addr);								
 								
-								if(opcode_s = push) then
+								if(opcode_s = pop) then
+									stack_ptr_val_v := stack_ptr_val_v + 1;
+									next_exec_state_v := waiting;
+									return_exec_state := write_back;
+									waiting_count_v := 1;
+									ram_addr_s <= std_logic_vector(stack_ptr_val_v(ram_addr_msb_num downto 0));									
+								else													-- if push instruction
+									ram_addr_s <= std_logic_vector(stack_ptr_val_v(ram_addr_msb_num downto 0));
 									ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));
 									ram_wr_en_v := '1';
-									stack_ptr_val_v := stack_ptr_val_v - 1;									
+									stack_ptr_val_v := stack_ptr_val_v - 1;
 								end if;
 																
 								reg_file_s(stack_ptr_reg_addr) <= stack_ptr_val_v;
@@ -394,6 +404,8 @@ begin
 									end case;
 								elsif(opcode_s = mov) then
 									reg_file_s(dest_reg_addr_s) <= reg_file_s(src_reg_addr_s);
+								elsif(opcode_s = pop) then
+									reg_file_s(dest_reg_addr_s) <= unsigned(ram_data_out_s);
 								else
 									reg_file_s(dest_reg_addr_s) <= alu_result_s;
 								end if;
