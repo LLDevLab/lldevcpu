@@ -64,7 +64,7 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - 16 bit register to store outgoing data
 - Offset: 0x0001
 
-### UART Status register
+#### UART Status register
 - 16 bit read-only register, where UART status are mapped
 - Offset: 0x0003
 - Bit 15: UART TX status
