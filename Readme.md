@@ -43,12 +43,12 @@ RAM memory mapped to addresses starting from 0x20000000.
 
 Peripherial registers mapped to addresses starting from 0x30000000.
 
-#### UART Setup register
+#### UART Control register
 
 - 16 bit register to set up UART interface
 - Offset: 0x0000
-- Bit 15: Transmitter enable bit
-- Bit 14: Receiver enable bit
+- Bit 15: tx enable bit
+- Bit 14: rx enable bit
 - Bits 13 - 11: Boud rate (at 50Mhz clock):
 	- 000 - 9600
 	- 001 - reserved
@@ -58,10 +58,21 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 101 - reserved
 	- 110 - 115200
 	- 111 - reserved
+- Bit 12: Start data transferring. Set this bit to 1, to start transfer data
 	
 #### UART data output register
 - 16 bit register to store outgoing data
 - Offset: 0x0001
+
+### UART Status register
+- 16 bit read-only register, where UART status are mapped
+- Offset: 0x0003
+- Bit 15: UART TX status
+	- 0: TX is ready
+	- 1: TX is not ready
+- Bit 14: UART TX finished
+	- 0: Indicate, that bit 12 in UART Control register has been cleared
+	- 1: Indicate, that data byte was transferred. To transfer next byte of data, bit 12 in UART Control register should be cleared and set to 1 again
 
 ## Supported Instructions
 
