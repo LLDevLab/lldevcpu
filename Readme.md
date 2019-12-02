@@ -58,7 +58,7 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 101 - reserved
 	- 110 - 115200
 	- 111 - reserved
-- Bit 12: Start data transferring. Set this bit to 1, to start transfer data
+- Bit 12: Send data bit. Setting this bit to 1, will start transferring data
 	
 #### UART data output register
 - 16 bit register to store outgoing data
@@ -70,9 +70,9 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - Bit 15: UART TX status
 	- 0: TX is ready
 	- 1: TX is not ready
-- Bit 14: UART TX finished
-	- 0: Indicate, that bit 12 in UART Control register has been cleared
-	- 1: Indicate, that data byte was transferred. To transfer next byte of data, bit 12 in UART Control register should be cleared and set to 1 again
+- Bit 14: Transmission start bit
+	- 0: Indicate, that transmission of data bit haven't been started
+	- 1: Indicate, that transmission of data bit have been started. To transfer next byte of data, bit 12 in UART Control register should be cleared and set to 1 again
 
 ## Supported Instructions
 
