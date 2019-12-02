@@ -68,8 +68,8 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - 16 bit read-only register, where UART status are mapped
 - Offset: 0x0003
 - Bit 15: UART TX status
-	- 0: TX is ready
-	- 1: TX is not ready
+	- 0: TX is not ready
+	- 1: TX is ready
 - Bit 14: Transmission start bit
 	- 0: Indicate, that transmission of data bit haven't been started
 	- 1: Indicate, that transmission of data bit have been started. To transfer next byte of data, bit 12 in UART Control register should be cleared and set to 1 again
