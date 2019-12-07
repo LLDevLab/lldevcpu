@@ -5,12 +5,10 @@ use ieee.numeric_std.all;
 use work.lldevcpu_pack.all;
 
 entity lldevcpu is
-	port(clk: in std_logic; bit_out: out std_logic := '1');
+	port(clk: in std_logic; uart_bit_out: out std_logic := '1');
 end entity lldevcpu;
 
 architecture lldevcpu_arch of lldevcpu is
-
-	signal sec_s: std_logic := '0';
 	
 	component clk_divider is
 		generic (delay_cnt: integer); 
@@ -20,7 +18,8 @@ architecture lldevcpu_arch of lldevcpu is
 	type pipeline_status is (loading, running);
 	type execution_states is (decode, exec, write_back, waiting);
 	type regfile is array(0 to 15) of unsigned32;
-	type periph_reg_file is array(0 to 2) of unsigned16;
+	type periph_reg_file is array(0 to 3) of unsigned16;
+	subtype mapped_mem_addr is std_logic_vector(max_addr_msb_num downto 0);
 
 	component rom is
 		port(address: in rom_addr; 
@@ -56,18 +55,17 @@ architecture lldevcpu_arch of lldevcpu is
 	
 	component uart is
 		port(clk: in std_logic; 
-			data_out: in std_logic_vector(7 downto 0);									
-			settings: in unsigned16;
-			tx_start_s: boolean;		
+			tx_data: in data8;									
+			control_bits: in unsigned16;		
 			bit_out: out std_logic;
-			uart_clk: out std_logic;			
+			tx_started: out boolean;			
 			tx_ready: buffer boolean);
 	end component;
 	
 	signal reg_file_s: regfile := (X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", top_of_stack, X"00000000"); 
 											
-	signal periph_reg_file_s: periph_reg_file := (X"0000", X"0000", X"0000");
+	signal periph_reg_file_s: periph_reg_file := (X"0000", X"0000", X"0000", X"0000");
 		
 	-- ROM control signals
 	signal rom_data_s: rom_data := X"00000000";
@@ -92,13 +90,10 @@ architecture lldevcpu_arch of lldevcpu is
 	signal cur_exec_state_s: execution_states;
 	
 	-- UART control signals
-	signal uart_clk_out_s: std_logic;
-	signal uart_tx_enable_s: boolean;
-	signal uart_rx_enable_s: boolean;
-	signal uart_rx_ready_s: boolean;
 	signal uart_tx_ready_s: boolean;
-	signal uart_bit_out_s: std_logic;
-	signal uart_bit_in_s: std_logic;
+	signal uart_tx_started_s: boolean;
+	signal uart_tx_ready_std_s: std_ulogic;
+	signal uart_tx_started_std_s: std_ulogic;
 	
 	-- RAM control signals
 	signal ram_data_in_s: ram_data := X"00000000";
@@ -208,7 +203,7 @@ architecture lldevcpu_arch of lldevcpu is
 	end function;
 	
 	procedure map_mem_addr(orig_addr: in unsigned(31 downto 0); 
-							mapped_addr: out std_logic_vector(31 downto 0);
+							mapped_addr: out mapped_mem_addr;
 							memory_type: out mem_type) is
 		alias mem_type_a: unsigned(3 downto 0) is orig_addr(31 downto 28);
 	begin
@@ -224,22 +219,26 @@ architecture lldevcpu_arch of lldevcpu is
 				memory_type := unknown;
 		end case;
 		
-		mapped_addr := "0000" & std_logic_vector(orig_addr(27 downto 0));
+		mapped_addr := std_logic_vector(orig_addr(max_addr_msb_num downto 0));
 		
 	end map_mem_addr;
-begin
 	
-	sec_delay: clk_divider 
-				generic map(25_000_000)	
-				port map(clk, sec_s);
-
+	function is_read_only_reg(mapped_addr: mapped_mem_addr) return boolean is
+		subtype mapped_mem_int is integer range 0 to 2047;
+		variable mapped_int: mapped_mem_int := 0;
+	begin
+		mapped_int := to_integer(unsigned(mapped_addr));
+		
+		return mapped_int = uart_status_reg_idx;
+	end is_read_only_reg;
+begin
 	rom1: rom port map(rom_addr_s,
-						sec_s,
+						clk,
 						rom_data_s);
 						
-	ram1: ram port map(ram_addr_s, sec_s, ram_data_in_s, ram_wr_en_s, ram_data_out_s);
+	ram1: ram port map(ram_addr_s, clk, ram_data_in_s, ram_wr_en_s, ram_data_out_s);
 				
-	instr_decoder1: instr_decoder port map(sec_s,
+	instr_decoder1: instr_decoder port map(clk,
 											instruction_s,
 											opcode_s,
 											dest_reg_addr_s,
@@ -247,7 +246,7 @@ begin
 											immediate_val_s);
 											
 	alu1: alu port map(alu_enable_s,
-						sec_s,
+						clk,
 						opcode_s,
 						alu_dest_val_s,
 						alu_src_val_s,
@@ -256,33 +255,20 @@ begin
 						
 	uart1: uart port map(clk,
 							std_logic_vector(periph_reg_file_s(uart_data_out_reg_idx)(7 downto 0)),
-							periph_reg_file_s(uart_settings_reg_idx),
-							uart_tx_enable_s,
-							uart_bit_out_s,
-							uart_clk_out_s,
-							uart_tx_ready_s);									
-						
-	bit_out <= uart_bit_out_s;
+							periph_reg_file_s(uart_control_reg_idx),
+							uart_bit_out,
+							uart_tx_started_s,
+							uart_tx_ready_s);
+							
+	uart_tx_ready_std_s <= '1' when uart_tx_ready_s else '0';
+	uart_tx_started_std_s <= '1' when uart_tx_started_s else '0';	
 	
-	uart_tx_process: process(uart_clk_out_s, periph_reg_file_s(uart_data_out_reg_idx), uart_tx_ready_s)
-		variable tmp_reg_val: unsigned16 := periph_reg_file_s(uart_data_out_reg_idx);
-	begin
-		if(falling_edge(uart_clk_out_s)) then
-			if(tmp_reg_val = periph_reg_file_s(uart_data_out_reg_idx)) then
-				uart_tx_enable_s <= false;
-			else
-				uart_tx_enable_s <= uart_tx_ready_s;
-			end if;
-			tmp_reg_val := periph_reg_file_s(uart_data_out_reg_idx);
-		end if;
-	end process uart_tx_process;
-	
-	exec_proc: process(sec_s)
+	exec_proc: process(clk)
 		variable next_pc_value: unsigned32 := X"00000000";
 		variable alu_enable_v: boolean;
 		variable need_write_back_v: boolean;
 		variable memory_type_v: mem_type;
-		variable mapped_addr_v: std_logic_vector(31 downto 0);
+		variable mapped_addr_v: mapped_mem_addr;
 		variable origin_addr_v: unsigned(31 downto 0);
 		variable next_exec_state_v: execution_states;
 		variable return_exec_state: execution_states;
@@ -292,7 +278,7 @@ begin
 		variable periph_addr_v: periph_addr := "000";
 		variable stack_ptr_val_v: unsigned32 := X"00000000";
 	begin
-		if(falling_edge(sec_s)) then
+		if(falling_edge(clk)) then
 			alu_enable_v := false;
 		
 			case pipeline_status_s is
@@ -354,12 +340,13 @@ begin
 										ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));									
 										ram_wr_en_v := '1';
 									when peripherials =>
-										periph_addr_v := mapped_addr_v(periph_addr_msb_num downto 0);
-										periph_reg_file_s(to_integer(unsigned(periph_addr_v))) <= reg_file_s(src_reg_addr_s)(15 downto 0);										
+										if(not is_read_only_reg(mapped_addr_v)) then
+											periph_addr_v := mapped_addr_v(periph_addr_msb_num downto 0);
+											periph_reg_file_s(to_integer(unsigned(periph_addr_v))) <= reg_file_s(src_reg_addr_s)(15 downto 0);										
+										end if;										
 									when others =>
 										null;
-								end case;
-								
+								end case;								
 								next_exec_state_v := write_back;
 							elsif(is_stack_op(opcode_s)) then
 								stack_ptr_val_v := reg_file_s(stack_ptr_reg_addr);								
@@ -408,7 +395,7 @@ begin
 									reg_file_s(dest_reg_addr_s) <= alu_result_s;
 								end if;
 							end if;
-							
+														
 							reg_file_s(status_reg_addr) <= alu_sreg_val_s;
 							cur_exec_state_s <= next_exec_state_v;
 						
@@ -432,6 +419,7 @@ begin
 					null;
 			end case;
 			
+			periph_reg_file_s(uart_status_reg_idx) <= uart_tx_ready_std_s & uart_tx_started_std_s & "00000000000000";
 			alu_enable_s <= alu_enable_v;
 		end if;
 	end process exec_proc;

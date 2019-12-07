@@ -1,10 +1,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.lldevcpu_pack.all;
 
 -- Universal Asynchronous Transmitter
 entity uat is
-	port(clk: in std_logic; enable: in boolean; data: in std_logic_vector(7 downto 0); bit_out: out std_logic := '1'; ready: buffer boolean := true);
+	port(clk: in std_logic; enable: in boolean; data: in data8; bit_out: out std_logic := '1'; ready: buffer boolean := true);
 end entity;
 
 architecture uat_arch of uat is

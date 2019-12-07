@@ -14,13 +14,19 @@ package lldevcpu_pack is
 	constant negative_flag_pos: integer := 29;
 	
 	-- UART register indexes
-	constant uart_settings_reg_idx: integer := 0;
+	constant uart_control_reg_idx: integer := 0;
 	constant uart_data_out_reg_idx: integer := 1;
 	constant uart_data_in_reg_idx: integer := 2;
+	constant uart_status_reg_idx: integer := 3;
+	
+	-- UART settings register bits
+	constant uart_tx_enable_bit: integer := 15;
+	constant uart_tx_started_bit: integer := 12;
 	
 	constant rom_addr_msb_num: integer := 11;
 	constant ram_addr_msb_num: integer := 9;
 	constant periph_addr_msb_num: integer := 2;
+	constant max_addr_msb_num: integer := rom_addr_msb_num;
 	
 	constant uart_max_baud_rate_divider: integer := 2_604;
 
@@ -28,6 +34,7 @@ package lldevcpu_pack is
 					rsh, rtl, rtr, rtlc, rtrc, addc, subc, ld, st, mov, push, pop);
 	type mem_type is (unknown, read_only_mem, rand_access_mem, peripherials);
 	
+	subtype data8 is std_logic_vector(7 downto 0);
 	subtype rom_data is std_logic_vector(31 downto 0);
 	subtype ram_data is std_logic_vector(31 downto 0);
 	subtype reg_addr is integer range 0 to 15;
