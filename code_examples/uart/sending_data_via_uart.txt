@@ -1,0 +1,35 @@
+// Store UART Control register address to r0
+ldi r0, #0x300000
+lsh r0, #8
+// Set data to UART data register
+mov r1, r0
+ldi r2, #1
+or r1, r2
+st r1, r2
+// Enable UART transmitter (this will also start transmission of first byte)
+ldi r1, #0x8000
+st r0, r1
+// Load UART status register address
+mov r2, r0
+ldi r3, #3
+or r2, r3
+// Load data from UART status register to register r3
+ld r3, r2
+ldi r2, #0xc000
+and r3, r2
+// jump to address 8 until bit 14 from UART status register not equal 0
+ldi r4, #8
+cmp r3, r2
+brne r4
+// if bit 14 from UART status register equal 0, then transfer next byte
+ldi r1, #0x1000
+ld r2, r0
+// Clear Send data bit 
+xor r2, r1
+st r0, r2
+// set Send data bit
+xor r2, r1
+st r0, r2
+// goto address 4
+ldi r4, #4
+br r4
