@@ -2,8 +2,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 entity clk_divider is
-	generic (delay_cnt: integer); 							
-	port(clk: in std_logic; out_s: out std_logic := '0');	
+	generic (delay_cnt: integer;
+			out_s_initial: std_logic := '0');
+	port(clk: in std_logic; out_s: out std_logic := out_s_initial);	
 end entity clk_divider;
 
 architecture clk_divider_arch of clk_divider is
