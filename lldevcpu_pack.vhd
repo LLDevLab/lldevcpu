@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 
 package lldevcpu_pack is
 	type opcode is (noop, add, sub, br, breq, brne, brlts, brgts, brltu, brgtu, cmp, clr, ldi, or_op, and_op, xor_op, not_op, lsh,
-					rsh, rtl, rtr, rtlc, rtrc, addc, subc, ld, st, mov, push, pop);
+					rsh, rtl, rtr, rtlc, rtrc, addc, subc, ld, st, mov, push, pop, call);
 	type mem_type is (unknown, read_only_mem, rand_access_mem, peripherials);
 	
 	type i2c_rw is (i2c_read, i2c_write);

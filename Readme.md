@@ -310,6 +310,14 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - Example: pop r0
 - Status flags affected: Flags are not affected
 
+### Call instruction
+
+- Opcode: 011110
+- Binary representation: Bits 31 – 26 are operation code (opcode), bits 25 – 22 are destination register's address. Other bits are reserved.
+- Description: Saves current programm counter register's value to the stack, decrements stack pointer registers's value and branches to the address from destination register (rd).
+- Example: call r0
+- Status flags affected: Flags are not affected
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

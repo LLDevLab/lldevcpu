@@ -5,15 +5,10 @@ use ieee.numeric_std.all;
 use work.lldevcpu_pack.all;
 
 entity lldevcpu is
-	port(clk: in std_logic; uart_bit_out: out std_logic := '1');
+	port(clk: in std_logic; uart_bit_out: out std_logic := '1'; i2c_scl: out std_logic; i2c_sda: inout std_logic);
 end entity lldevcpu;
 
 architecture lldevcpu_arch of lldevcpu is
-	
-	component clk_divider is
-		generic (delay_cnt: integer); 
-		port(clk: in std_logic; out_s: out std_logic := '0');
-	end component;
 
 	type pipeline_status is (loading, running);
 	type execution_states is (decode, exec, write_back, waiting);
@@ -62,6 +57,11 @@ architecture lldevcpu_arch of lldevcpu is
 			tx_ready: buffer boolean);
 	end component;
 	
+	component i2c_master is
+		port(clk: in std_logic; enable: in boolean; addr: in data8; data_out: in data16; sda: inout std_logic; data_in: out data16; scl: buffer std_logic; 
+			ready: out boolean);
+	end component;
+	
 	signal reg_file_s: regfile := (X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", top_of_stack, X"00000000"); 
 											
@@ -108,6 +108,13 @@ architecture lldevcpu_arch of lldevcpu is
 	alias sreg_carry_a: std_ulogic is reg_file_s(status_reg_addr)(carry_flag_pos);
 	alias sreg_zero_a: std_ulogic is reg_file_s(status_reg_addr)(zero_flag_pos);
 	alias sreg_negative_a: std_ulogic is reg_file_s(status_reg_addr)(negative_flag_pos);
+	
+	-- i2c control signals
+	signal i2c_enable_s: boolean;
+	signal i2c_ready_s: boolean;
+	signal i2c_data_in_s: data16;			-- incoming data
+	signal i2c_data_out_s: data16;			-- outgoing data
+	signal i2c_dev_addr_s: data8;
 	
 	function need_writeback(op_code: opcode) return boolean is
 	begin
@@ -199,7 +206,14 @@ architecture lldevcpu_arch of lldevcpu is
 	function is_stack_op(op_code: opcode) return boolean is
 	begin
 		return (op_code = push or
-				op_code = pop);
+				op_code = pop or
+				op_code = call);
+	end function;
+	
+	function is_pushing_op(op_code: opcode) return boolean is
+	begin
+		return (op_code = push or
+				op_code = call);
 	end function;
 	
 	procedure map_mem_addr(orig_addr: in unsigned(31 downto 0); 
@@ -261,7 +275,9 @@ begin
 							uart_tx_ready_s);
 							
 	uart_tx_ready_std_s <= '1' when uart_tx_ready_s else '0';
-	uart_tx_started_std_s <= '1' when uart_tx_started_s else '0';	
+	uart_tx_started_std_s <= '1' when uart_tx_started_s else '0';
+
+	i2c_master1: i2c_master port map(clk, i2c_enable_s, i2c_dev_addr_s, i2c_data_out_s, i2c_sda, i2c_data_in_s, i2c_scl, i2c_ready_s);	
 	
 	exec_proc: process(clk)
 		variable next_pc_value: unsigned32 := X"00000000";
@@ -277,6 +293,7 @@ begin
 		variable rom_data_v: rom_data := X"00000000";
 		variable periph_addr_v: periph_addr := "000";
 		variable stack_ptr_val_v: unsigned32 := X"00000000";
+		variable data_to_push_v: unsigned32 := X"00000000";
 	begin
 		if(falling_edge(clk)) then
 			alu_enable_v := false;
@@ -357,9 +374,17 @@ begin
 									return_exec_state := write_back;
 									waiting_count_v := 1;
 									ram_addr_s <= std_logic_vector(stack_ptr_val_v(ram_addr_msb_num downto 0));									
-								else													-- if push instruction
+								elsif(is_pushing_op(opcode_s)) then
+									if(opcode_s = call) then
+										data_to_push_v := reg_file_s(pc_reg_addr);
+										reg_file_s(pc_reg_addr) <= reg_file_s(dest_reg_addr_s);
+										rom_addr_s <= std_logic_vector(reg_file_s(dest_reg_addr_s)(rom_addr_msb_num downto 0));
+									else														-- if opcode is push
+										data_to_push_v := reg_file_s(src_reg_addr_s);
+									end if;
+								
 									ram_addr_s <= std_logic_vector(stack_ptr_val_v(ram_addr_msb_num downto 0));
-									ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));
+									ram_data_in_s <= std_logic_vector(data_to_push_v);
 									ram_wr_en_v := '1';
 									stack_ptr_val_v := stack_ptr_val_v - 1;
 								end if;
