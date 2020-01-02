@@ -136,7 +136,8 @@ architecture lldevcpu_arch of lldevcpu is
 				op_code = subc or
 				op_code = ld or
 				op_code = mov or
-				op_code = pop);
+				op_code = pop or
+				op_code = ret);
 	end function;
 	
 	function is_branch(op_code: opcode) return boolean is
@@ -207,13 +208,20 @@ architecture lldevcpu_arch of lldevcpu is
 	begin
 		return (op_code = push or
 				op_code = pop or
-				op_code = call);
+				op_code = call or
+				op_code = ret);
 	end function;
 	
 	function is_pushing_op(op_code: opcode) return boolean is
 	begin
 		return (op_code = push or
 				op_code = call);
+	end function;
+	
+	function is_popping_op(op_code: opcode) return boolean is
+	begin
+		return (op_code = pop or
+				op_code = ret);
 	end function;
 	
 	procedure map_mem_addr(orig_addr: in unsigned(31 downto 0); 
@@ -246,6 +254,7 @@ architecture lldevcpu_arch of lldevcpu is
 		return mapped_int = uart_status_reg_idx;
 	end is_read_only_reg;
 begin
+	
 	rom1: rom port map(rom_addr_s,
 						clk,
 						rom_data_s);
@@ -368,12 +377,12 @@ begin
 							elsif(is_stack_op(opcode_s)) then
 								stack_ptr_val_v := reg_file_s(stack_ptr_reg_addr);								
 								
-								if(opcode_s = pop) then
+								if(is_popping_op(opcode_s)) then
 									stack_ptr_val_v := stack_ptr_val_v + 1;
 									next_exec_state_v := waiting;
 									return_exec_state := write_back;
 									waiting_count_v := 1;
-									ram_addr_s <= std_logic_vector(stack_ptr_val_v(ram_addr_msb_num downto 0));									
+									ram_addr_s <= std_logic_vector(stack_ptr_val_v(ram_addr_msb_num downto 0));
 								elsif(is_pushing_op(opcode_s)) then
 									if(opcode_s = call) then
 										data_to_push_v := reg_file_s(pc_reg_addr);
@@ -416,6 +425,14 @@ begin
 									reg_file_s(dest_reg_addr_s) <= reg_file_s(src_reg_addr_s);
 								elsif(opcode_s = pop) then
 									reg_file_s(dest_reg_addr_s) <= unsigned(ram_data_out_s);
+								elsif(opcode_s = ret) then
+									reg_file_s(pc_reg_addr) <= unsigned(ram_data_out_s);
+									rom_addr_s <= std_logic_vector(ram_data_out_s(rom_addr_msb_num downto 0));
+									
+									-- wait for 1 cycle while next instruction will be loaded
+									waiting_count_v := 1;
+									next_exec_state_v := waiting;
+									return_exec_state := decode;
 								else
 									reg_file_s(dest_reg_addr_s) <= alu_result_s;
 								end if;

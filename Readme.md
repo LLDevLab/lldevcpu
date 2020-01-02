@@ -318,6 +318,14 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - Example: call r0
 - Status flags affected: Flags are not affected
 
+### Ret instruction
+
+- Opcode: 011111
+- Binary representation: Bits 31 – 26 are operation code (opcode). Other bits are reserved.
+- Description: Restores return address from the stack to programm counter register and increments stack pointer register's value.
+- Example: ret
+- Status flags affected: Flags are not affected
+
 ## Related software
 
 lldevcpu assembly language compiler is located [here](https://github.com/LLDevLab/LLDevCompiler.git)

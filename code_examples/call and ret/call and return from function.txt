@@ -1,0 +1,31 @@
+// load address of the main function to r0 register
+ldi r0, #12
+br r0
+addOne:
+// create stack frame
+mov r1, r14
+// get parameters address
+// put map of RAM address
+ldi r2, #2
+lsh r2, #28
+ldi r3, #2
+add r2, r3
+// add stack frame address to register
+add r2, r1
+// load parameters value to r0
+ld r0, r2
+// get parameter from the stack
+ldi r2, #1
+add r0, r2
+ret
+
+main:
+ldi r1, #1
+main_loop:
+push r1
+ldi r1, addOne
+call r1
+pop r1
+mov r1, r0
+ldi r0, main_loop
+br r0

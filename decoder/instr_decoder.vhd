@@ -158,6 +158,10 @@ begin
 					instr_opcode <= call;
 					src_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
 					dest_reg_addr_v := to_integer(unsigned(dest_reg_addr_s));
+				when "011111" =>
+					instr_opcode <= ret;
+					src_reg_addr_v := 0;
+					dest_reg_addr_v := 0;
 				when others =>
 					instr_opcode <= noop;
 			end case;
