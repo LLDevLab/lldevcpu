@@ -58,7 +58,7 @@ architecture lldevcpu_arch of lldevcpu is
 	end component;
 	
 	component i2c_master is
-		port(clk: in std_logic; enable: in boolean; addr: in data8; data_out: in data16; sda: inout std_logic; data_in: out data16; scl: buffer std_logic; 
+		port(clk: in std_logic; enable: in boolean; addr: in data8; data_out: in data8; sda: inout std_logic; data_in: out data8; scl: buffer std_logic; 
 			ready: out boolean);
 	end component;
 	
@@ -112,8 +112,8 @@ architecture lldevcpu_arch of lldevcpu is
 	-- i2c control signals
 	signal i2c_enable_s: boolean;
 	signal i2c_ready_s: boolean;
-	signal i2c_data_in_s: data16;			-- incoming data
-	signal i2c_data_out_s: data16;			-- outgoing data
+	signal i2c_data_in_s: data8;			-- incoming data
+	signal i2c_data_out_s: data8;			-- outgoing data
 	signal i2c_dev_addr_s: data8;
 	
 	function need_writeback(op_code: opcode) return boolean is

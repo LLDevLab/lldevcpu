@@ -12,7 +12,6 @@ package lldevcpu_pack is
 	type i2c_send_state is (i2c_sending, i2c_sending_ack, i2c_sending_rdy);
 	
 	subtype data8 is std_logic_vector(7 downto 0);
-	subtype data16 is std_logic_vector(15 downto 0);
 	subtype rom_data is std_logic_vector(31 downto 0);
 	subtype ram_data is std_logic_vector(31 downto 0);
 	subtype reg_addr is integer range 0 to 15;
@@ -33,10 +32,7 @@ package lldevcpu_pack is
 	constant uart_max_baud_rate_divider: integer := 2_604;
 	subtype baud_rate is integer range 108 to uart_max_baud_rate_divider;
 	
-	subtype int_0_to_1 is integer range 0 to 1;
-	
 	subtype data8_range is integer range 0 to 7;
-	subtype data16_range is integer range 0 to 15;
 
 	-- special purpose registers
 	constant pc_reg_addr: integer := 15;
@@ -59,8 +55,6 @@ package lldevcpu_pack is
 	constant uart_tx_started_bit: integer := 12;
 	
 	constant max_addr_msb_num: integer := rom_addr_msb_num;
-	
-	constant byte_len: integer := 8;
 	
 	constant i2c_addr_rw_bit: integer := 7;
 	

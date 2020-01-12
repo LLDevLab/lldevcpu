@@ -6,7 +6,7 @@ use work.lldevcpu_pack.all;
 entity i2c_master is
 	-- data_out - outgoing data
 	-- data_in - incoming data 
-	port(clk: in std_logic; enable: in boolean; addr: in data8; data_out: in data16; sda: inout std_logic := '1'; data_in: out data16 := X"0000"; 
+	port(clk: in std_logic; start: in boolean; addr: in data8; data_out: in data8; sda: inout std_logic := '1'; data_in: out data8 := X"00"; 
 			scl: buffer std_logic := '1'; ready: out boolean := true);
 end entity;
 
@@ -26,9 +26,9 @@ architecture i2c_master_arch of i2c_master is
 	signal i2c_state_addr_s: i2c_send_state;
 	signal i2c_state_data_s: i2c_send_state;
 	signal addr_ack_s: std_logic := '1';
-	signal data_ack_s: std_logic_vector(0 to 1) := "11";
+	signal data_ack_s: std_logic := '1';
 	signal addr_s: data8 := X"00";
-	signal data_s: data16 := X"0000";
+	signal data_s: data8 := X"00";
 	
 	signal sda_ready_s: boolean := true;
 	signal scl_ready_s: boolean := true;
@@ -42,18 +42,18 @@ architecture i2c_master_arch of i2c_master is
 		end if;
 	end generate_scl;
 begin
-	i2c_clk1: clk_divider port map(clk, clk_s);
-	--clk_s <= clk;
+	--i2c_clk1: clk_divider port map(clk, clk_s);
+	clk_s <= clk;
 	sda <= sda_s when sda_rw_s = i2c_write else 'Z';
 	ready <= sda_ready_s and scl_ready_s;
 	
 	-- process, that manages i2c states
-	state_proc: process(clk_s, enable)
+	state_proc: process(clk_s, start)
 	begin
 		if(falling_edge(clk_s)) then
 			case i2c_state_s is
 				when i2c_idle =>
-					if(enable) then
+					if(start) then
 						i2c_state_s <= i2c_start;
 						scl_ready_s <= false;
 						scl <= '1';
@@ -128,7 +128,6 @@ begin
 	
 	sda_proc: process(clk_s)
 		variable cnt_v: data8_range := 0;
-		variable data_block_cnt_v: int_0_to_1 := 0;
 	begin
 		if(rising_edge(clk_s)) then
 			case i2c_state_s is
@@ -139,7 +138,6 @@ begin
 					sda_ready_s <= false;
 					i2c_state_addr_s <= i2c_sending;
 					i2c_state_data_s <= i2c_sending;
-					data_block_cnt_v := 0;
 				when i2c_addr_send =>
 					case i2c_state_addr_s is
 						when i2c_sending =>
@@ -166,7 +164,7 @@ begin
 						case i2c_state_data_s is
 							when i2c_sending =>
 								if(scl = '0') then
-									sda_s <= data_s(data_block_cnt_v * byte_len + cnt_v);
+									sda_s <= data_s(cnt_v);
 								else
 									if(cnt_v < 7) then
 										cnt_v := cnt_v + 1;
@@ -178,14 +176,9 @@ begin
 							when i2c_sending_ack =>
 								if(scl = '1') then
 									sda_s <= '0';											-- reset sda_s, just in case
-									data_ack_s(data_block_cnt_v) <= sda;
+									data_ack_s <= sda;
 									
-									if(data_block_cnt_v = 0) then
-										data_block_cnt_v := 1;
-										i2c_state_data_s <= i2c_sending;
-									else
-										i2c_state_data_s <= i2c_sending_rdy;
-									end if;
+									i2c_state_data_s <= i2c_sending_rdy;
 								end if;
 							when others =>
 								null;
@@ -195,7 +188,7 @@ begin
 							when i2c_sending =>
 								if(scl = '1') then
 									sda_s <= '0';											-- reset sda_s, just in case
-									data_s(data_block_cnt_v * byte_len + cnt_v) <= sda;
+									data_s(cnt_v) <= sda;
 									
 									if(cnt_v < 7) then
 										cnt_v := cnt_v + 1;
@@ -208,12 +201,7 @@ begin
 								if(scl = '0') then
 									sda_s <= '0';
 								else
-									if(data_block_cnt_v = 0) then
-										data_block_cnt_v := 1;
-										i2c_state_data_s <= i2c_sending;
-									else
-										i2c_state_data_s <= i2c_sending_rdy;
-									end if;
+									i2c_state_data_s <= i2c_sending_rdy;
 								end if;
 							when others =>
 								null;
