@@ -44,7 +44,6 @@ RAM memory mapped to addresses starting from 0x20000000.
 Peripherial registers mapped to addresses starting from 0x30000000.
 
 #### UART Control register
-
 - 16 bit register to set up UART interface
 - Offset: 0x0000
 - Bit 15: tx enable bit
@@ -73,6 +72,44 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - Bit 14: Transmission start bit
 	- 0: Indicate, that transmission of data bit haven't been started
 	- 1: Indicate, that transmission of data bit have been started. To transfer next byte of data, bit 12 in UART Control register should be cleared and set to 1 again
+
+### I2C Control register
+- 16 bit register to set up I2C interface
+- Offset: 0x0004
+- Bit 15: tx enable bit
+- Bit 14: rx enable bit
+- Bits 13 - 11: Clock rate (at 50Mhz clock):
+	- 000 - 1Mhz
+	- 001 - reserved
+	- 010 - reserved
+	- 011 - reserved
+	- 100 - reserved
+	- 101 - reserved
+	- 110 - reserved
+	- 111 - reserved
+- Bit 12: Send data bit. Setting this bit to 1, will start transferring data
+- Bit 11: Transmitting data length
+	- 0 - 8 bit
+	- 1 - reserved
+
+### I2C address register
+- 16 bit register. If device is a master, least significant byte of this register holds address of slave device. 
+If device is a slave, least significant byte of this register holds device's address.
+- Offset: 0x0005
+
+### I2C data input/output register
+- 16 bit register, that holds incoming or outgoing data.
+- Offset: 0x0006
+
+### I2C Status register
+- 16 bit read-only register, where I2C status are mapped
+- Offset: 0x0007
+- Bit 15: I2C interface status
+	- 0: I2C is not ready
+	- 1: I2C is ready
+- Bit 14: Transmission start bit
+	- 0: Indicate, that transmission of data bit haven't been started
+	- 1: Indicate, that transmission of data bit have been started. To transfer next byte of data, bit 12 in I2C Control register should be cleared and set to 1 again
 
 ## Supported Instructions
 
