@@ -73,7 +73,7 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 0: Indicate, that transmission of data bit haven't been started
 	- 1: Indicate, that transmission of data bit have been started. To transfer next byte of data, bit 12 in UART Control register should be cleared and set to 1 again
 
-### I2C Control register
+#### I2C Control register
 - 16 bit register to set up I2C interface
 - Offset: 0x0004
 - Bit 15: tx enable bit
@@ -92,16 +92,16 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 0 - 8 bit
 	- 1 - reserved
 
-### I2C address register
+#### I2C address register
 - 16 bit register. If device is a master, least significant byte of this register holds address of slave device. 
 If device is a slave, least significant byte of this register holds device's address.
 - Offset: 0x0005
 
-### I2C data input/output register
+#### I2C data input/output register
 - 16 bit register, that holds incoming or outgoing data.
 - Offset: 0x0006
 
-### I2C Status register
+#### I2C Status register
 - 16 bit read-only register, where I2C status are mapped
 - Offset: 0x0007
 - Bit 15: I2C interface status
