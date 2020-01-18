@@ -76,9 +76,11 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 #### I2C Control register
 - 16 bit register to set up I2C interface
 - Offset: 0x0004
-- Bit 15: tx enable bit
-- Bit 14: rx enable bit
-- Bits 13 - 11: Clock rate (at 50Mhz clock):
+- Bit 15: i2c enable bit
+- Bit 14: device type:
+	- 0 - master
+	- 1 - slave (not supported yet)
+- Bits 13 - 11: Clock rate (at 50Mhz FPGA clock):
 	- 000 - 1Mhz
 	- 001 - reserved
 	- 010 - reserved
