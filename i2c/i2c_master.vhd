@@ -12,14 +12,7 @@ end entity;
 
 architecture i2c_master_arch of i2c_master is	
 	type bool_arr_2 is array(0 to 1) of boolean;
-
-	component clk_divider is
-		generic (delay_cnt: integer := 50;
-				out_s_initial: std_logic := '1'); 
-		port(clk: in std_logic; out_s: out std_logic := '0');
-	end component;
 	
-	signal clk_s: std_logic := '1';
 	signal sda_rw_s: i2c_rw := i2c_write;
 	signal sda_s: std_logic := '1';
 	signal i2c_state_s: i2c_state;
@@ -42,15 +35,13 @@ architecture i2c_master_arch of i2c_master is
 		end if;
 	end generate_scl;
 begin
-	--i2c_clk1: clk_divider port map(clk, clk_s);
-	clk_s <= clk;
 	sda <= sda_s when sda_rw_s = i2c_write else 'Z';
 	ready <= sda_ready_s and scl_ready_s;
 	
 	-- process, that manages i2c states
-	state_proc: process(clk_s, start)
+	state_proc: process(clk, start)
 	begin
-		if(falling_edge(clk_s)) then
+		if(falling_edge(clk)) then
 			case i2c_state_s is
 				when i2c_idle =>
 					if(start) then
@@ -126,10 +117,10 @@ begin
 		end if;
 	end process state_proc;
 	
-	sda_proc: process(clk_s)
+	sda_proc: process(clk)
 		variable cnt_v: data8_range := 0;
 	begin
-		if(rising_edge(clk_s)) then
+		if(rising_edge(clk)) then
 			case i2c_state_s is
 				when i2c_start =>
 					data_s <= data_out;

@@ -13,7 +13,7 @@ architecture lldevcpu_arch of lldevcpu is
 	type pipeline_status is (loading, running);
 	type execution_states is (decode, exec, write_back, waiting);
 	type regfile is array(0 to 15) of unsigned32;
-	type periph_reg_file is array(0 to 3) of unsigned16;
+	type periph_reg_file is array(0 to 7) of unsigned16;
 	subtype mapped_mem_addr is std_logic_vector(max_addr_msb_num downto 0);
 
 	component rom is
@@ -57,15 +57,15 @@ architecture lldevcpu_arch of lldevcpu is
 			tx_ready: buffer boolean);
 	end component;
 	
-	component i2c_master is
-		port(clk: in std_logic; enable: in boolean; addr: in data8; data_out: in data8; sda: inout std_logic; data_in: out data8; scl: buffer std_logic; 
-			ready: out boolean);
+	component i2c is
+		port(clk: in std_logic; control_bits: in unsigned16; i2c_addr: in unsigned16; data_out: in data8; sda: inout std_logic; data_in: out data8; 
+				scl: buffer std_logic; started: out boolean; ready: buffer boolean);
 	end component;
 	
 	signal reg_file_s: regfile := (X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
 											X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", top_of_stack, X"00000000"); 
 											
-	signal periph_reg_file_s: periph_reg_file := (X"0000", X"0000", X"0000", X"0000");
+	signal periph_reg_file_s: periph_reg_file := (X"0000", X"0000", X"0000", X"0000", X"0000", X"0000", X"0000", X"0000");
 		
 	-- ROM control signals
 	signal rom_data_s: rom_data := X"00000000";
@@ -110,11 +110,13 @@ architecture lldevcpu_arch of lldevcpu is
 	alias sreg_negative_a: std_ulogic is reg_file_s(status_reg_addr)(negative_flag_pos);
 	
 	-- i2c control signals
-	signal i2c_enable_s: boolean;
-	signal i2c_ready_s: boolean;
-	signal i2c_data_in_s: data8;			-- incoming data
+	signal i2c_start_s: boolean;
 	signal i2c_data_out_s: data8;			-- outgoing data
-	signal i2c_dev_addr_s: data8;
+	signal i2c_data_in_s: data8;			-- incoming data
+	signal i2c_ready_s: boolean;
+	signal i2c_ready_std_s: std_ulogic;
+	signal i2c_started_s: boolean;
+	signal i2c_started_std_s: std_ulogic;
 	
 	function need_writeback(op_code: opcode) return boolean is
 	begin
@@ -251,7 +253,8 @@ architecture lldevcpu_arch of lldevcpu is
 	begin
 		mapped_int := to_integer(unsigned(mapped_addr));
 		
-		return mapped_int = uart_status_reg_idx;
+		return mapped_int = uart_status_reg_idx or
+				mapped_int = i2c_status_reg_idx;
 	end is_read_only_reg;
 begin
 	
@@ -282,11 +285,21 @@ begin
 							uart_bit_out,
 							uart_tx_started_s,
 							uart_tx_ready_s);
-							
 	uart_tx_ready_std_s <= '1' when uart_tx_ready_s else '0';
 	uart_tx_started_std_s <= '1' when uart_tx_started_s else '0';
-
-	i2c_master1: i2c_master port map(clk, i2c_enable_s, i2c_dev_addr_s, i2c_data_out_s, i2c_sda, i2c_data_in_s, i2c_scl, i2c_ready_s);	
+	
+	i2c1: i2c port map(clk, 
+						periph_reg_file_s(i2c_control_reg_idx), 
+						periph_reg_file_s(i2c_address_reg_idx), 
+						i2c_data_out_s, 
+						i2c_sda, 
+						i2c_data_in_s,	
+						i2c_scl, 
+						i2c_started_s, 
+						i2c_ready_s);
+	i2c_data_out_s <= std_logic_vector(periph_reg_file_s(i2c_data_io_reg_idx)(7 downto 0));
+	i2c_ready_std_s <= '1' when i2c_ready_s else '0';
+	i2c_started_std_s <= '1' when i2c_started_s else '0';
 	
 	exec_proc: process(clk)
 		variable next_pc_value: unsigned32 := X"00000000";
@@ -462,6 +475,7 @@ begin
 			end case;
 			
 			periph_reg_file_s(uart_status_reg_idx) <= uart_tx_ready_std_s & uart_tx_started_std_s & "00000000000000";
+			periph_reg_file_s(i2c_status_reg_idx) <= i2c_ready_std_s & i2c_started_std_s & "00000000000000";
 			alu_enable_s <= alu_enable_v;
 		end if;
 	end process exec_proc;

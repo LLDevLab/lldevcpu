@@ -10,6 +10,8 @@ package lldevcpu_pack is
 	type i2c_rw is (i2c_read, i2c_write);
 	type i2c_state is (i2c_idle, i2c_start, i2c_addr_send, i2c_data_send, i2c_stop);
 	type i2c_send_state is (i2c_sending, i2c_sending_ack, i2c_sending_rdy);
+	constant i2c_max_divider: integer := 100_000;
+	subtype i2c_clk_div is integer range 1 to i2c_max_divider;
 	
 	subtype data8 is std_logic_vector(7 downto 0);
 	subtype rom_data is std_logic_vector(31 downto 0);
@@ -50,12 +52,19 @@ package lldevcpu_pack is
 	constant uart_data_in_reg_idx: integer := 2;
 	constant uart_status_reg_idx: integer := 3;
 	
-	-- UART settings register bits
+	-- I2C register indexes
+	constant i2c_control_reg_idx: integer := 4;
+	constant i2c_address_reg_idx: integer := 5;
+	constant i2c_data_io_reg_idx: integer := 6;
+	constant i2c_status_reg_idx: integer := 7;
+	
+	-- UART control register bits
 	constant uart_tx_enable_bit: integer := 15;
 	constant uart_tx_started_bit: integer := 12;
 	
 	constant max_addr_msb_num: integer := rom_addr_msb_num;
 	
+	-- I2C protocol bits
 	constant i2c_addr_rw_bit: integer := 7;
 	
 	constant top_of_stack: unsigned32 := X"000002ff";
