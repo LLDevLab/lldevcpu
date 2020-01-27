@@ -89,10 +89,12 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 101 - reserved
 	- 110 - reserved
 	- 111 - reserved
-- Bit 12: Send data bit. Setting this bit to 1, will start transferring data
-- Bit 11: Transmitting data length
-	- 0 - 8 bit
-	- 1 - reserved
+- Bit 10: Send data bit. Setting this bit to 1, will start transferring data
+- Bits 9 - 8: Transmitting data length
+	- 00 - 8 bit
+	- 01 - 16 bit
+	- 10 - Reserved
+	- 11 - Reserved
 
 #### I2C address register
 - 16 bit register. If device is a master, least significant byte of this register holds address of slave device. 

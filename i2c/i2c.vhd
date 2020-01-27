@@ -35,11 +35,12 @@ architecture i2c_arch of i2c is
 	signal i2c_clk_divider_s: i2c_scl_div_type := 10;
 	signal i2c_master_ready_s: boolean;
 	signal i2c_ready_s: boolean := true;
+	signal i2c_tx_data_len_s: i2c_tx_data_len;
 	
 	alias i2c_enable_a: std_ulogic is control_bits_s(15);
 	alias i2c_dev_type_a: std_ulogic is control_bits_s(14);
 	alias i2c_clk_divider_a: unsigned(2 downto 0) is control_bits_s(13 downto 11);
-	alias i2c_tx_started_a: std_ulogic is control_bits_s(12);
+	alias i2c_tx_started_a: std_ulogic is control_bits_s(10);
 begin
 	i2c_clk1: i2c_clk_divider port map(clk_enable_s, clk, i2c_clk_divider_s, clk_s);
 	clk_enable_s <= true when i2c_enable_a = '1' else false;

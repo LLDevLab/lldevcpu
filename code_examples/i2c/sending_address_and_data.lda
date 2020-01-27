@@ -24,7 +24,7 @@ ldi r1, main_loop
 br r1
 ret
 
-// Set bit 12 of i2c control register to 0 and back to 1
+// Set bit 10 of i2c control register to 0 and back to 1
 i2c_start_transfer:
 push r12
 mov r12, r14
@@ -32,15 +32,15 @@ push r0
 push r1
 ldi r1, get_ctrl_reg_val
 call r1
-// clearing bit 12 of i2c control register
-ldi r1, #0xefff
+// clearing bit 10 of i2c control register
+ldi r1, #0xfbff
 and r1, r0
 push r1
 ldi r1, set_ctrl_reg_val
 call r1
 pop r1
-// setting bit 12 of i2c control register
-ldi r1, #0x1000
+// setting bit 10 of i2c control register
+ldi r1, #0x400
 or r1, r0
 push r1
 ldi r1, set_ctrl_reg_val
