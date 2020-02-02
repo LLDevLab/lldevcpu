@@ -80,7 +80,7 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 - Bit 14: device type:
 	- 0 - master
 	- 1 - slave (not supported yet)
-- Bits 13 - 11: Clock rate (at 50Mhz FPGA clock):
+- Bits 13 - 11: i2c clock rate on master device (at 50Mhz FPGA clock):
 	- 000 - 1Mhz
 	- 001 - reserved
 	- 010 - reserved
@@ -89,16 +89,17 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 101 - reserved
 	- 110 - reserved
 	- 111 - reserved
-- Bit 10: Send data bit. Setting this bit to 1, will start transferring data
-- Bits 9 - 8: Transmitting data length
-	- 00 - 8 bit
-	- 01 - 16 bit
-	- 10 - Reserved
-	- 11 - Reserved
+- Bit 10: Start send. If device is a master, switching this bit from 0 to 1 indicate, that i2c start signal should be send. If this flag is switching 
+from 0 to 1 during transferring data, rstart signal will be generated. If device is a slave, this flag will be ignored.
+- Bit 9: Stop send. If device is a master, switching this bit from 0 to 1 indicate, that i2c stop signal should be send. If device is a slave, 
+this flag will be ignored.
+- Bit 8: Data send. Switching this bit from 0 to 1 indicate, that new byte of data should be send.
+- Bit 7: R/W state:
+	- 0 - Indicate, that byte of data should be send to i2c interface.
+	- 1 - Indicate, that byte of data should be read from i2c interface.
 
 #### I2C address register
-- 16 bit register. If device is a master, least significant byte of this register holds address of slave device. 
-If device is a slave, least significant byte of this register holds device's address.
+- 16 bit register. If device is a master, this register is not used. If device is a slave, least significant byte of this register holds device's address.
 - Offset: 0x0005
 
 #### I2C data input/output register
@@ -111,9 +112,9 @@ If device is a slave, least significant byte of this register holds device's add
 - Bit 15: I2C interface status
 	- 0: I2C is not ready
 	- 1: I2C is ready
-- Bit 14: Transmission start bit
-	- 0: Indicate, that transmission of data bit haven't been started
-	- 1: Indicate, that transmission of data bit have been started. To transfer next byte of data, bit 12 in I2C Control register should be cleared and set to 1 again
+- Bit 14: I2C acknowledgement bit.
+	- 0: acknowledgement
+	- 1: not acknowledgement
 
 ## Supported Instructions
 
