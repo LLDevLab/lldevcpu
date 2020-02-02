@@ -109,7 +109,7 @@ this flag will be ignored.
 #### I2C Status register
 - 16 bit read-only register, where I2C status are mapped
 - Offset: 0x0007
-- Bit 15: I2C interface status
+- Bit 15: I2C bus status
 	- 0: I2C is not ready
 	- 1: I2C is ready
 - Bit 14: I2C acknowledgement bit.
