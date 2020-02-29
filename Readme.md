@@ -94,6 +94,7 @@ from 0 to 1 during transferring data, rstart signal will be generated. If device
 - Bit 9: Stop send. If device is a master, switching this bit from 0 to 1 indicate, that i2c stop signal should be send. If device is a slave, 
 this flag will be ignored.
 - Bit 8: Data send. Switching this bit from 0 to 1 indicate, that new byte of data should be send.
+	- NB! Before switching this flag to 1, actual data should be already loaded into "I2C data input/output register"
 - Bit 7: R/W state:
 	- 0 - Indicate, that byte of data should be send to i2c interface.
 	- 1 - Indicate, that byte of data should be read from i2c interface.

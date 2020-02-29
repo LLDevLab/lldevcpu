@@ -5,10 +5,12 @@ use ieee.numeric_std.all;
 use work.lldevcpu_pack.all;
 
 entity lldevcpu is
-	port(clk: in std_logic; uart_bit_out: out std_logic := '1'; i2c_scl: out std_logic; i2c_sda: inout std_logic);
+	--port(clk: in std_logic; uart_bit_out: out std_logic := '1'; i2c_scl: out std_logic; i2c_sda: inout std_logic);
+	port(uart_bit_out: out std_logic := '1'; i2c_scl: out std_logic; i2c_sda: inout std_logic);
 end entity lldevcpu;
 
 architecture lldevcpu_arch of lldevcpu is
+	signal clk: std_logic := '0';
 
 	type pipeline_status is (loading, running);
 	type execution_states is (decode, exec, write_back, waiting);
@@ -58,8 +60,15 @@ architecture lldevcpu_arch of lldevcpu is
 	end component;
 	
 	component i2c is
-		port(clk: in std_logic; control_bits: in unsigned16; i2c_addr: in unsigned16; data_out: in data8; sda: inout std_logic; data_in: out data8; 
-				scl: buffer std_logic; started: out boolean; ready: buffer boolean);
+		port(clk: in std_logic; 
+			control_bits: in unsigned16; 
+			i2c_addr: in unsigned16; 
+			data_out: in data8; 
+			sda: inout std_logic; 
+			data_in: out data8;
+			i2c_data_ack: out std_logic;
+			scl: buffer std_logic; 
+			ready: buffer boolean);
 	end component;
 	
 	signal reg_file_s: regfile := (X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000", X"00000000",
@@ -115,8 +124,7 @@ architecture lldevcpu_arch of lldevcpu is
 	signal i2c_data_in_s: data8;			-- incoming data
 	signal i2c_ready_s: boolean;
 	signal i2c_ready_std_s: std_ulogic;
-	signal i2c_started_s: boolean;
-	signal i2c_started_std_s: std_ulogic;
+	signal i2c_data_ack_s: std_logic;
 	
 	function need_writeback(op_code: opcode) return boolean is
 	begin
@@ -257,6 +265,8 @@ architecture lldevcpu_arch of lldevcpu is
 				mapped_int = i2c_status_reg_idx;
 	end is_read_only_reg;
 begin
+
+	clk <= not clk after 5 ns;
 	
 	rom1: rom port map(rom_addr_s,
 						clk,
@@ -293,13 +303,12 @@ begin
 						periph_reg_file_s(i2c_address_reg_idx), 
 						i2c_data_out_s, 
 						i2c_sda, 
-						i2c_data_in_s,	
+						i2c_data_in_s,
+						i2c_data_ack_s,
 						i2c_scl, 
-						i2c_started_s, 
 						i2c_ready_s);
 	i2c_data_out_s <= std_logic_vector(periph_reg_file_s(i2c_data_io_reg_idx)(7 downto 0));
 	i2c_ready_std_s <= '1' when i2c_ready_s else '0';
-	i2c_started_std_s <= '1' when i2c_started_s else '0';
 	
 	exec_proc: process(clk)
 		variable next_pc_value: unsigned32 := X"00000000";
@@ -480,7 +489,7 @@ begin
 			end case;
 			
 			periph_reg_file_s(uart_status_reg_idx) <= uart_tx_ready_std_s & uart_tx_started_std_s & "00000000000000";
-			periph_reg_file_s(i2c_status_reg_idx) <= i2c_ready_std_s & i2c_started_std_s & "00000000000000";
+			periph_reg_file_s(i2c_status_reg_idx) <= i2c_ready_std_s & i2c_data_ack_s & "00000000000000";
 			alu_enable_s <= alu_enable_v;
 		end if;
 	end process exec_proc;

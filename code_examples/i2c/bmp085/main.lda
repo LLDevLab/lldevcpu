@@ -1,0 +1,9 @@
+main:
+ldi r0, i2c_enable
+call r0
+ldi r0, bmp085_get_calibrations
+call r0
+main_loop:
+ldi r1, main_loop
+br r1
+ret

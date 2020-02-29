@@ -8,7 +8,7 @@ package lldevcpu_pack is
 	type mem_type is (unknown, read_only_mem, rand_access_mem, peripherials);
 	
 	type i2c_rw is (i2c_read, i2c_write);
-	type i2c_state is (i2c_idle, i2c_start, i2c_addr_send, i2c_data_send, i2c_stop);
+	type i2c_state is (i2c_idle, i2c_start, i2c_data_send, i2c_stop);
 	type i2c_send_state is (i2c_sending, i2c_sending_ack, i2c_sending_rdy);
 	constant i2c_max_divider: integer := 100_000;
 	subtype i2c_clk_div is integer range 1 to i2c_max_divider;
@@ -33,8 +33,6 @@ package lldevcpu_pack is
 	
 	constant uart_max_baud_rate_divider: integer := 2_604;
 	subtype baud_rate is integer range 108 to uart_max_baud_rate_divider;
-	
-	subtype data8_range is integer range 0 to 7;
 
 	-- special purpose registers
 	constant pc_reg_addr: integer := 15;
