@@ -15,13 +15,12 @@ ldi r3, #1
 push r4
 // Send calibration registers msb
 bmp085_get_calibrations_loop:
-// send start condition to sensor
-push r0
-ldi r0, i2c_send_start_signal
-call r0
+// send start condition
+ldi r4, i2c_send_start_signal
+call r4
 // send bmp085 write address
-ldi r0, bmp085_send_write_addr
-call r0
+ldi r4, bmp085_send_write_addr
+call r4
 // send bmp085 register address to read
 mov r4, r0
 add r4, r1
@@ -30,7 +29,7 @@ ldi r4, bmp085_send_data
 call r4
 pop r4
 // read data from sensor
-// send start condition to sensor
+// send start condition
 ldi r4, i2c_send_start_signal
 call r4
 // send bmp085 read address

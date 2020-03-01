@@ -49,24 +49,37 @@ begin
 		variable sda_v: std_logic := '1';
 		variable ready_v: boolean := true;
 		variable data_cnt_v: data_range := 0;
-		variable sda_rw_v: i2c_rw;
+		variable sda_rw_v: i2c_rw := i2c_write;
 	begin
 		if(falling_edge(clk)) then
 			sda_rw_v := sda_rw_s;
 			if(prev_start_send_v) then
 				case i2c_state_v is
 					when i2c_start =>
-						ready_v := false;
-						sda_rw_s <= rw_init_state;
+						sda_rw_v := i2c_write;
 						if(scl_v = '1' and sda_v = '1') then
+							ready_v := false;
 							sda_v := '0';
 						elsif(sda_v = '0' and scl_v = '1') then
 							scl_v := '0';
-							data_out_s <= data_out;
 							ready_v := true;
 						end if;
 					when i2c_data_send =>
-						if(data_cnt_v <= 9) then						
+						sda_rw_v := rw_init_state;
+						
+						-- after data was sending and ack was reading ready is setting to true and scl to 0
+						if(data_cnt_v = 9 and scl_v = '1') then
+							ready_v := true;
+							scl_v := '0';
+						end if;
+						
+						if(data_cnt_v < 9) then
+							ready_v := false;
+							
+							if(data_cnt_v = 0) then
+								data_out_s <= data_out;
+							end if;
+							
 							if(scl_v = '0') then
 								scl_v := '1';
 								data_cnt_v := data_cnt_v + 1;
@@ -76,12 +89,11 @@ begin
 							
 							-- Reading or writing ack bit
 							if(data_cnt_v = 9) then
-								sda_rw_s <= get_rw_state(sda_rw_v);
+								sda_rw_v := get_rw_state(sda_rw_v);
 							end if;
-						end if;					
+						end if;
 					when i2c_stop =>
-						sda_rw_s <= get_rw_state(sda_rw_v);
-						ready_v := false;
+						sda_rw_v := i2c_write;
 						-- this condition can occur at any time, so I'm checking all possible scl and sda states
 						if(scl_v = '0') then
 							if(sda_v = '0') then
@@ -93,8 +105,13 @@ begin
 							if(sda_v = '0') then
 								sda_v := '1';
 								i2c_state_v := i2c_idle;
-								ready_v := true;
 							end if;
+						end if;
+						
+						if(sda_v = '1' and scl_v = '1') then
+							ready_v := true;
+						else
+							ready_v := false;
 						end if;
 					when others => 
 						null;
@@ -136,6 +153,7 @@ begin
 				prev_data_send_v := data_send;
 			end if;
 			
+			sda_rw_s <= sda_rw_v;
 			i2c_state_s <= i2c_state_v;
 			data_cnt_s <= data_cnt_v;
 			sda_start_stop_s <= sda_v;
@@ -144,36 +162,40 @@ begin
 		end if;
 	end process state_proc;
 	
-	data_write_proc: process(scl_s)
+	data_write_proc: process(clk, scl_s)
 	begin
-		if(falling_edge(scl_s)) then
-			if(rw_init_state = i2c_write) then
-				-- Sending data
-				if(data_cnt_s < 8) then						-- sending bits 0 to 7
-					sda_data_s <= data_out_s(data_cnt_s);
-				end if;
-			else
-				-- Sending ack
-				if(data_cnt_s = 9) then 
-					sda_data_s <= '1';
+		if(falling_edge(clk) and scl_s = '0') then
+			if(sda_rw_s = i2c_write) then
+				if(rw_init_state = i2c_write) then
+					-- Sending data
+					if(data_cnt_s < 8) then						-- sending bits 0 to 7
+						sda_data_s <= data_out_s(data_cnt_s);
+					end if;
+				else
+					-- Sending ack
+					if(data_cnt_s = 9) then 
+						sda_data_s <= '1';
+					end if;
 				end if;
 			end if;
 		end if;
 	end process data_write_proc;
 	
-	data_read_proc: process(scl_s)
+	data_read_proc: process(clk, scl_s)
 	begin
-		if(rising_edge(scl_s)) then
-			if(rw_init_state = i2c_read) then
-				-- Read data from i2c
-				if(data_cnt_s < 8) then						-- receiving bits 0 to 7
-					ack_s <= '1';							-- Reset ack bit
-					data_in_s(data_cnt_s) <= sda;
-				end if;
-			else
-				-- Read ack
-				if(data_cnt_s = 9) then
-					ack_s <= sda;
+		if(rising_edge(clk) and scl_s = '1') then
+			if(sda_rw_s = i2c_read) then
+				if(rw_init_state = i2c_read) then
+					-- Read data from i2c
+					if(data_cnt_s < 8) then						-- receiving bits 0 to 7
+						ack_s <= '1';							-- Reset ack bit
+						data_in_s(data_cnt_s) <= sda;
+					end if;
+				else
+					-- Read ack
+					if(data_cnt_s = 9) then
+						ack_s <= sda;
+					end if;
 				end if;
 			end if;
 		end if;

@@ -10,9 +10,10 @@ ldi r0, #0xfeff
 and r0, r1
 push r0
 ldi r0, i2c_set_ctrl_reg_val
+call r0
 pop r0
 // Set bit 8 (Data send bit) in i2c control resister
-ldi r1, #0x100
+ldi r0, #0x100
 or r0, r1
 push r0
 ldi r0, i2c_set_ctrl_reg_val
