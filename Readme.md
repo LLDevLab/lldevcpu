@@ -89,11 +89,13 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 101 - reserved
 	- 110 - reserved
 	- 111 - reserved
-- Bit 10: Start send. If device is a master, switching this bit from 0 to 1 indicate, that i2c start signal should be send. If this flag is switching 
-from 0 to 1 during transferring data, rstart signal will be generated. If device is a slave, this flag will be ignored.
-- Bit 9: Stop send. If device is a master, switching this bit from 0 to 1 indicate, that i2c stop signal should be send. If device is a slave, 
-this flag will be ignored.
-- Bit 8: Data send. Switching this bit from 0 to 1 indicate, that new byte of data should be send.
+- Bit 10: Start send. If device is a master, switching this bit from 0 to 1 indicate, that i2c start signal must be send. "i2c bus status" bit in 
+"i2c status register" will indicate the status of sending start signal. If this flag is switching from 0 to 1 during transferring data, rstart signal 
+will be generated. If device is a slave, this flag will be ignored.
+- Bit 9: Stop send. If device is a master, switching this bit from 0 to 1 indicate, that i2c stop signal must be send. "i2c bus status" bit in 
+"i2c status register" will indicate the status of sending stop signal. If device is a slave, this flag will be ignored.
+- Bit 8: Data send. Switching this bit from 0 to 1 indicate, that new byte of data must be send. "i2c bus status" bit in "i2c status register" 
+will indicate the status of sending data.
 	- NB! Before switching this flag to 1, actual data should be already loaded into "I2C data input/output register"
 - Bit 7: R/W state:
 	- 0 - Indicate, that byte of data should be send to i2c interface.
