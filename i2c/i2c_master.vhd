@@ -21,7 +21,6 @@ architecture i2c_master_arch of i2c_master is
 	signal i2c_state_s: i2c_state;
 	signal scl_s: std_logic := '1';
 	signal data_cnt_s: data_range := 0;
-	signal data_out_s: data8 := X"00";
 	signal data_in_s: data8 := X"00";
 	signal ack_s: std_logic := '1';
 	
@@ -75,10 +74,6 @@ begin
 						
 						if(data_cnt_v < 9) then
 							ready_v := false;
-							
-							if(data_cnt_v = 0) then
-								data_out_s <= data_out;
-							end if;
 							
 							if(scl_v = '0') then
 								scl_v := '1';
@@ -169,7 +164,7 @@ begin
 				if(rw_init_state = i2c_write) then
 					-- Sending data
 					if(data_cnt_s < 8) then						-- sending bits 0 to 7
-						sda_data_s <= data_out_s(data_cnt_s);
+						sda_data_s <= data_out(data_cnt_s);
 					end if;
 				else
 					-- Sending ack

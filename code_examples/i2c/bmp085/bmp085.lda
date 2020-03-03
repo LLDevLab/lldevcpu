@@ -1,5 +1,6 @@
 // Get calibration of bmp085 device
 bmp085_get_calibrations:
+push r0
 // r0 - calibration registers base address
 ldi r0, #0xaa
 // r1 - loop iteration counter
@@ -13,6 +14,8 @@ push r3
 ldi r3, #1
 // r4 - register, that holds temporary values
 push r4
+// r5 - register to hold received calibration value
+push r5
 // Send calibration registers msb
 bmp085_get_calibrations_loop:
 // send start condition
@@ -41,6 +44,12 @@ add r4, r1
 push r4
 ldi r4, bmp085_send_data
 call r4
+push r0
+ldi r4, i2c_receive_data
+call r4
+mov r5, r0
+lsh r5, #8
+pop r0
 pop r4
 // Send lsb calibration register's address
 add r1, r3
@@ -49,13 +58,23 @@ add r4, r1
 push r4
 ldi r4, bmp085_send_data
 call r4
+push r0
+ldi r4, i2c_receive_data
+call r4
+or r5, r0
+pop r0
 pop r4
 add r1, r3
 ldi r4, i2c_send_stop_signal
+push r5
+ldi r5, heap_save_colibration
+call r5
+pop r5
 ldi r4, bmp085_get_calibrations_loop
 cmp r1, r2
 brne r4
 // Restore the stack and return from function
+pop r5
 pop r4
 pop r3
 pop r2
