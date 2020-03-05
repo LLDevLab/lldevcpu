@@ -164,10 +164,10 @@ ret
 // 	- A value to set
 i2c_set_ctrl_reg_val:
 push r12
+mov r12, r14
 push r0
 push r1
 push r2
-mov r12, r14
 ldi r0, i2c_get_ctrl_reg_addr
 call r0
 // Get parameter from the stack
@@ -202,8 +202,6 @@ ld r0, r1
 pop r1
 ret
 
-// TODO: Check from here
-
 // Set data to "I2C data input/output register"
 // Arguments:
 //	- The only argument is a data to save
@@ -211,45 +209,51 @@ i2c_set_data:
 push r12
 mov r12, r14
 push r0
+push r1
+push r2
 ldi r0, i2c_get_data_reg_addr
 call r0
-push r1
-mov r1, r0
 // Get parameter from the stack
-push r2
 // Set map of RAM addresses
-ldi r0, #2
-lsh r0, #28
+ldi r1, #2
+lsh r1, #28
 // Or'ing stack frame with the map
-or r0, r12
+or r1, r12
 // Parameter will have an offset r12 + 3
 ldi r2, #3
-add r0, r2
+add r1, r2
 // Load parameter's value to r2 register
-ld r2, r0
+ld r2, r1
 // Store data to the register
-st r1, r2
+st r0, r2
+// Return from function
 pop r2
 pop r1
-// r0 were not popped after i2c_get_addr_reg_addr function call
 pop r0
 pop r12
 ret
 
 // Returns I2C Control Register's value
 i2c_get_ctrl_reg_val:
+push r1
 ldi r0, i2c_get_ctrl_reg_addr
 call r0
-// Load data from address stored in register r0 to register r0
-ld r0, r0
+mov r1, r0
+// Load data from address stored in register r1 to register r0
+ld r0, r1
+// return from function
+pop r1
 ret
 
 // Returns I2C Status Register's value
 i2c_get_status_reg_val:
+push r1
 ldi r0, i2c_get_status_reg_addr
 call r0
-// Load data from address stored in register r0 to register r0
-ld r0, r0
+mov r1, r0
+// Load data from address stored in register r1 to register r0
+ld r0, r1
+pop r1
 ret
 
 // Return address of I2C Status register (through r0 register)
@@ -260,6 +264,7 @@ push r1
 ldi r0, get_periph_addr
 call r0
 pop r1
+// return from function
 pop r1
 ret
 
@@ -271,6 +276,7 @@ push r1
 ldi r0, get_periph_addr
 call r0
 pop r1
+// return from function
 pop r1
 ret
 
@@ -282,6 +288,7 @@ push r1
 ldi r0, get_periph_addr
 call r0
 pop r1
+// return from function
 pop r1
 ret
 
@@ -293,5 +300,6 @@ push r1
 ldi r0, get_periph_addr
 call r0
 pop r1
+// return from function
 pop r1
 ret

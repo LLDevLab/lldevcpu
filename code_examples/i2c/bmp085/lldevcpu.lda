@@ -3,10 +3,10 @@
 // 	- An offset
 get_periph_addr:
 push r12
-push r2
 // Create the stack frame
 // Move current SP value to r12 register
 mov r12, r14
+push r2
 // Get parameter from the stack
 // Set map of RAM addresses
 ldi r0, #2
@@ -34,12 +34,12 @@ ret
 // 	- A value to store
 set_ram_val:
 push r12
+mov r12, r14
 push r0
 push r1
 push r2
 push r3
 push r4
-mov r12, r14
 // Get "offset" parameter from the stack
 // Set map of RAM addresses
 ldi r0, #2
@@ -77,10 +77,10 @@ ret
 // 	- An offset 
 get_ram_val:
 push r12
+mov r12, r14
 push r1
 push r2
 push r3
-mov r12, r14
 // Get parameter from the stack
 // Set map of RAM addresses (r0 will be used to return value, so I don't need to save it)
 ldi r0, #2
