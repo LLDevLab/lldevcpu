@@ -12,7 +12,7 @@ entity i2c_master is
 end entity;
 
 architecture i2c_master_arch of i2c_master is
-	subtype data_range is integer range 0 to 10;
+	subtype data_range is integer range 0 to 9;
 
 	signal sda_rw_s: i2c_rw := i2c_write;
 	signal sda_s: std_logic := '1';
@@ -64,7 +64,7 @@ begin
 							scl_v := '0';
 							ready_v := true;
 						end if;
-					when i2c_data_send =>						
+					when i2c_data_send =>
 						-- after data was sending and ack was reading ready is setting to true and scl to 0
 						if(rising_scl_cnt_v = 9 and scl_v = '1') then
 							ready_v := true;
@@ -178,7 +178,7 @@ begin
 					end if;
 				else
 					-- Sending ack
-					if(falling_scl_cnt_s = 8) then 
+					if(falling_scl_cnt_s = 8) then
 						sda_data_s <= '0';
 					end if;
 				end if;
@@ -192,13 +192,13 @@ begin
 			if(sda_rw_s = i2c_read) then
 				if(rw_init_state = i2c_read) then
 					-- Read data from i2c
-					if(falling_scl_cnt_s < 8) then						-- receiving bits 0 to 7
+					if(falling_scl_cnt_s < 8) then					-- receiving bits 0 to 7
 						ack_s <= '1';								-- Reset ack bit
 						data_in_s(falling_scl_cnt_s) <= sda;
 					end if;
 				else
 					-- Read ack
-					if(rising_scl_cnt_s = 9) then
+					if(rising_scl_cnt_s = 9 and falling_scl_cnt_s < 9) then
 						ack_s <= sda;
 					end if;
 				end if;
