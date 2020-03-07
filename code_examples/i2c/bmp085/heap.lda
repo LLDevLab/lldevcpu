@@ -2,7 +2,7 @@
 // Parameters:
 // 1 - The calibration to save
 // 2 - Index of an array where to save calibration
-heap_save_colibration:
+heap_save:
 push r12
 mov r12, r14
 push r0
@@ -24,10 +24,9 @@ ldi r3, #3
 add r3, r1
 ld r1, r3
 // store value to heap
-mov r3, r0
 // add offset (index) to ram address
-add r3, r2
-st r3, r1
+add r0, r2
+st r0, r1
 pop r3
 pop r2
 pop r1
@@ -37,7 +36,7 @@ ret
 
 // Returns the calibration from the heap
 // 1 - Index of calibration to return
-heap_get_calibration:
+heap_get:
 push r12
 mov r12, r14
 push r1

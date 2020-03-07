@@ -77,7 +77,7 @@ call r4
 push r6
 // pass first parameter to function
 push r5
-ldi r5, heap_save_colibration
+ldi r5, heap_save
 call r5
 pop r5
 pop r6
