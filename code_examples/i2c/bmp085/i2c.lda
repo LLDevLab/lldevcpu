@@ -119,6 +119,9 @@ push r0
 ldi r0, i2c_set_ctrl_reg_val
 call r0
 pop r0
+// Waiting while bus will be ready
+ldi r0, i2c_wait
+call r0
 // Return from function
 pop r1
 pop r0
