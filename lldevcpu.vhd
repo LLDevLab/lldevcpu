@@ -371,7 +371,7 @@ begin
 								
 								case memory_type_v is
 									when rand_access_mem =>
-										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);										
+										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);									
 									when read_only_mem =>
 										rom_addr_s <= mapped_addr_v(rom_addr_msb_num downto 0);
 									when peripherials =>
@@ -385,6 +385,7 @@ begin
 								
 								case memory_type_v is
 									when rand_access_mem =>
+										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);
 										ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));									
 										ram_wr_en_v := '1';
 									when peripherials =>
