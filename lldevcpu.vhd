@@ -5,13 +5,10 @@ use ieee.numeric_std.all;
 use work.lldevcpu_pack.all;
 
 entity lldevcpu is
-	--port(clk: in std_logic; uart_bit_out: out std_logic := '1'; i2c_scl: out std_logic; i2c_sda: inout std_logic);
-	port(uart_bit_out: out std_logic := '1'; i2c_scl: out std_logic; i2c_sda: inout std_logic);
+	port(clk: in std_logic; uart_bit_out: out std_logic := '1'; i2c_scl: out std_logic; i2c_sda: inout std_logic);
 end entity lldevcpu;
 
 architecture lldevcpu_arch of lldevcpu is
-	signal clk: std_logic := '0';
-
 	type pipeline_status is (loading, running);
 	type execution_states is (decode, exec, write_back, waiting);
 	type regfile is array(0 to 15) of unsigned32;
@@ -265,8 +262,6 @@ architecture lldevcpu_arch of lldevcpu is
 				mapped_int = i2c_status_reg_idx;
 	end is_read_only_reg;
 begin
-
-	clk <= not clk after 5 ns;
 	
 	rom1: rom port map(rom_addr_s,
 						clk,
