@@ -462,7 +462,7 @@ begin
 							end if;
 							
 							-- When reading data from i2c device
-							if(i2c_ready_s and periph_reg_file_s(i2c_address_reg_idx)(i2c_addr_rw_bit) = '1') then
+							if(i2c_ready_s and periph_reg_file_s(i2c_control_reg_idx)(i2c_addr_rw_bit) = '1') then
 								periph_reg_file_s(i2c_data_io_reg_idx) <= X"00" & unsigned(i2c_data_in_s);
 							end if;
 														

@@ -180,6 +180,7 @@ begin
 					-- Sending ack
 					if(falling_scl_cnt_s = 8) then
 						sda_data_s <= '0';
+						data_in <= data_in_s;
 					end if;
 				end if;
 			end if;
