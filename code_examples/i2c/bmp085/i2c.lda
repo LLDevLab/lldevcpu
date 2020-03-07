@@ -103,7 +103,7 @@ ldi r1, #0x200
 and r1, r0
 // previous operation will set zero flag if 9th bit is 0 in r0 register
 ldi r1, i2c_send_stop_signal_set_stop_bit
-brne r1
+breq r1
 // Otherwise clear 9th bit first
 ldi r1, #0xfdff
 and r0, r1
