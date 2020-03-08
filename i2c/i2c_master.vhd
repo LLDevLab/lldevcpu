@@ -24,15 +24,6 @@ architecture i2c_master_arch of i2c_master is
 	signal falling_scl_cnt_s: data_range := 0;
 	signal data_in_s: i2c_data8 := X"00";
 	signal ack_s: std_logic := '1';
-	
-	function get_rw_state(state_p: i2c_rw) return i2c_rw is
-	begin
-		if(state_p = i2c_write) then
-			return i2c_read;
-		else
-			return i2c_write;
-		end if;
-	end get_rw_state;
 begin
 	sda <= sda_s when sda_rw_s = i2c_write else 'Z';
 	scl <= scl_s;
@@ -72,7 +63,6 @@ begin
 						end if;
 						
 						if(rising_scl_cnt_v < 9) then
-							sda_rw_v := rw_init_state;
 							ready_v := false;
 							
 							if(scl_v = '0') then
@@ -84,9 +74,12 @@ begin
 							end if;
 							
 							-- Reading or writing ack bit
-							if((rw_init_state = i2c_write and rising_scl_cnt_v = 9) or 
-								(rw_init_state = i2c_read and falling_scl_cnt_v = 8)) then
-								sda_rw_v := get_rw_state(sda_rw_v);
+							if(falling_scl_cnt_v = 8) then
+								if(rw_init_state = i2c_write) then
+									sda_rw_v := i2c_read;
+								else
+									sda_rw_v := i2c_write;
+								end if;
 							end if;
 						end if;
 					when i2c_stop =>
@@ -152,6 +145,7 @@ begin
 					i2c_state_v := i2c_data_send;
 					rising_scl_cnt_v := 0;
 					falling_scl_cnt_v := 0;
+					sda_rw_v := rw_init_state;
 				end if;
 				prev_data_send_v := data_send;
 			end if;
@@ -168,7 +162,7 @@ begin
 	
 	data_write_proc: process(clk, scl_s)
 	begin
-		if(falling_edge(clk) and scl_s = '0') then
+		if(rising_edge(clk) and scl_s = '0') then			
 			if(sda_rw_s = i2c_write) then
 				if(rw_init_state = i2c_write) then
 					-- Sending data
@@ -189,7 +183,7 @@ begin
 	
 	data_read_proc: process(clk, scl_s)
 	begin
-		if(rising_edge(clk) and scl_s = '1') then
+		if(falling_edge(clk) and scl_s = '1') then
 			if(sda_rw_s = i2c_read) then
 				if(rw_init_state = i2c_read) then
 					-- Read data from i2c
