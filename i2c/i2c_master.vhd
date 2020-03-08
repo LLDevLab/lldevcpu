@@ -7,7 +7,7 @@ entity i2c_master is
 	-- data_out - outgoing data
 	-- data_in - incoming data 
 	port(clk: in std_logic; start_send: in boolean; stop_send: in boolean; data_send: in boolean; 
-			data_out: in data8; rw_init_state: in i2c_rw; sda: inout std_logic := '1'; data_in: out data8 := X"00";
+			data_out: in i2c_data8; rw_init_state: in i2c_rw; sda: inout std_logic := '1'; data_in: out i2c_data8 := X"00";
 			scl: out std_logic := '1'; ack: out std_logic := '1'; ready: out boolean := true);
 end entity;
 
@@ -22,7 +22,7 @@ architecture i2c_master_arch of i2c_master is
 	signal scl_s: std_logic := '1';
 	signal rising_scl_cnt_s: data_range := 0;
 	signal falling_scl_cnt_s: data_range := 0;
-	signal data_in_s: data8 := X"00";
+	signal data_in_s: i2c_data8 := X"00";
 	signal ack_s: std_logic := '1';
 	
 	function get_rw_state(state_p: i2c_rw) return i2c_rw is

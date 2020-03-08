@@ -60,9 +60,9 @@ architecture lldevcpu_arch of lldevcpu is
 		port(clk: in std_logic; 
 			control_bits: in unsigned16; 
 			i2c_addr: in unsigned16; 
-			data_out: in data8; 
+			data_out: in i2c_data8; 
 			sda: inout std_logic; 
-			data_in: out data8;
+			data_in: out i2c_data8;
 			i2c_data_ack: out std_logic;
 			scl: buffer std_logic; 
 			ready: buffer boolean);
