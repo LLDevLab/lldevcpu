@@ -229,6 +229,16 @@ add r1, r2
 ld r2, r1
 // Store data to the register
 st r0, r2
+// read i2c control register's value
+//ldi r0, i2c_get_ctrl_reg_addr
+//call r0
+// set "R/W state" to write (clear 7th bit of i2c control register)
+//ldi r1, #0xff7f
+//and r0, r1
+//push r0
+//ldi r0, i2c_set_ctrl_reg_val
+//call r0
+//pop r0
 // Return from function
 pop r2
 pop r1
