@@ -1,0 +1,62 @@
+// Saves colibration value to heap
+// Parameters:
+// 1 - The calibration to save
+// 2 - Index of an array where to save calibration
+heap_save:
+push r12
+mov r12, r14
+push r0
+push r1
+push r2
+push r3
+// Get parameter from the stack
+// Set map of RAM addresses to r0 register
+ldi r0, #2
+lsh r0, #28
+mov r1, r12
+or r1, r0
+// load second parameter from the stack to r2 register
+ldi r3, #4
+add r3, r1
+ld r2, r3
+// load first parameter from the stack to r1 register
+ldi r3, #3
+add r3, r1
+ld r1, r3
+// store value to heap
+// add offset (index) to ram address
+add r0, r2
+st r0, r1
+pop r3
+pop r2
+pop r1
+pop r0
+pop r12
+ret
+
+// Returns the calibration from the heap
+// 1 - Index of calibration to return
+heap_get:
+push r12
+mov r12, r14
+push r1
+push r2
+// Get parameter from the stack
+// Set map of RAM addresses to r0 register
+ldi r0, #2
+lsh r0, #28
+mov r1, r12
+or r1, r0
+ldi r2, #3
+add r2, r1
+// Load parameter to register r1
+ld r1, r2
+// add offset to ram mask value
+add r1, r0
+// load value from heap to r0 register
+ld r0, r1
+// return from function
+pop r2
+pop r1
+pop r12
+ret

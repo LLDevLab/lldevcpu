@@ -7,7 +7,7 @@ use work.lldevcpu_pack.all;
 entity i2c is
 	-- data_out - outgoing data
 	-- data_in - incoming data 
-	port(clk: in std_logic; control_bits: in unsigned16; i2c_addr: in unsigned16; data_out: in data8; sda: inout std_logic := '1'; data_in: out data8 := X"00"; 
+	port(clk: in std_logic; control_bits: in unsigned16; i2c_addr: in unsigned16; data_out: in i2c_data8; sda: inout std_logic := '1'; data_in: out i2c_data8 := X"00"; 
 			i2c_data_ack: out std_logic; scl: buffer std_logic := '1'; ready: buffer boolean := true);
 end entity;
 
@@ -22,7 +22,7 @@ architecture i2c_arch of i2c is
 
 	component i2c_master is
 		port(clk: in std_logic; start_send: in boolean; stop_send: in boolean; data_send: in boolean; 
-				data_out: in data8; rw_init_state: in i2c_rw; sda: inout std_logic; data_in: out data8;
+				data_out: in i2c_data8; rw_init_state: in i2c_rw; sda: inout std_logic; data_in: out i2c_data8;
 				scl: out std_logic; ack: out std_logic; ready: out boolean);
 	end component;
 	

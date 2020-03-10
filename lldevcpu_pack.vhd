@@ -14,6 +14,7 @@ package lldevcpu_pack is
 	subtype i2c_clk_div is integer range 1 to i2c_max_divider;
 	
 	subtype data8 is std_logic_vector(7 downto 0);
+	subtype i2c_data8 is std_logic_vector(0 to 7);
 	subtype rom_data is std_logic_vector(31 downto 0);
 	subtype ram_data is std_logic_vector(31 downto 0);
 	subtype reg_addr is integer range 0 to 15;

@@ -60,9 +60,9 @@ architecture lldevcpu_arch of lldevcpu is
 		port(clk: in std_logic; 
 			control_bits: in unsigned16; 
 			i2c_addr: in unsigned16; 
-			data_out: in data8; 
+			data_out: in i2c_data8; 
 			sda: inout std_logic; 
-			data_in: out data8;
+			data_in: out i2c_data8;
 			i2c_data_ack: out std_logic;
 			scl: buffer std_logic; 
 			ready: buffer boolean);
@@ -366,7 +366,7 @@ begin
 								
 								case memory_type_v is
 									when rand_access_mem =>
-										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);										
+										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);									
 									when read_only_mem =>
 										rom_addr_s <= mapped_addr_v(rom_addr_msb_num downto 0);
 									when peripherials =>
@@ -380,6 +380,7 @@ begin
 								
 								case memory_type_v is
 									when rand_access_mem =>
+										ram_addr_s <= mapped_addr_v(ram_addr_msb_num downto 0);
 										ram_data_in_s <= std_logic_vector(reg_file_s(src_reg_addr_s));									
 										ram_wr_en_v := '1';
 									when peripherials =>
@@ -456,7 +457,7 @@ begin
 							end if;
 							
 							-- When reading data from i2c device
-							if(i2c_ready_s and periph_reg_file_s(i2c_address_reg_idx)(i2c_addr_rw_bit) = '1') then
+							if(i2c_ready_s and periph_reg_file_s(i2c_control_reg_idx)(i2c_addr_rw_bit) = '1') then
 								periph_reg_file_s(i2c_data_io_reg_idx) <= X"00" & unsigned(i2c_data_in_s);
 							end if;
 														
