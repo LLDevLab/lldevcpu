@@ -100,6 +100,9 @@ will indicate the status of i2c bus.
 - Bit 7: R/W state:
 	- 0 - Indicate, that byte of data should be send to i2c interface.
 	- 1 - Indicate, that byte of data should be receiving from i2c interface.
+- Bit 6: ACK/NACK bit. In master mode determines, what should it send to slave (ack or nack).
+	- 0 - NACK should be sended.
+	- 1 - ACK should be sended.
 
 #### I2C address register
 - 16 bit register. If device is a master, this register is not used. If device is a slave, least significant byte of this register holds device's address.

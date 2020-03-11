@@ -39,12 +39,24 @@ ldi r4, bmp085_send_read_addr
 call r4
 // save current value of r0
 push r0
+// Setting ack state to "ack"
+ldi r0, #1
+push r0
+ldi r0, i2c_set_ack_state
+call r0
+pop r0
 // receive msb of calibration
 ldi r4, i2c_receive_data
 call r4
 mov r5, r0
 lsh r5, #8
 // receive lsb of calibration
+// Setting ack state to "nack"
+clr r0
+push r0
+ldi r0, i2c_set_ack_state
+call r0
+pop r0
 // r4 still holds i2c_receive_data value
 call r4
 or r5, r0

@@ -31,6 +31,53 @@ call r0
 pop r1
 ret
 
+// Setting 6th bit in i2c control register. Bit will be cleared if function argument is 0, otherwise argument will be set.
+// Arguments:
+// - Ack bit state
+i2c_set_ack_state:
+push r12
+mov r12, r14
+push r0
+push r1
+push r2
+// Get parameter from the stack
+// Set map of RAM addresses
+ldi r0, #2
+lsh r0, #28
+// Or'ing stack frame with the map
+or r0, r12
+// Parameter will have an offset r12 + 3
+ldi r1, #3
+add r0, r1
+// Load parameter's value to r1 register
+ld r1, r0
+ldi r0, i2c_get_ctrl_reg_val
+call r0
+clr r2
+cmp r1, r2
+ldi r2, i2c_set_ack_state_clr
+breq r2
+// set 6th bit of i2c control register
+ldi r2, #0x40
+or r0, r2
+ldi r2, i2c_set_ack_state_continue
+br r2
+// clear 6th bit of i2c control register
+i2c_set_ack_state_clr:
+ldi r2, #0xffbf
+and r0, r2
+i2c_set_ack_state_continue:
+push r0
+ldi r0, i2c_set_ctrl_reg_val
+call r0
+pop r0
+// return from function
+pop r2
+pop r1
+pop r0
+pop r12
+ret
+
 // Sending data from "i2c data input/output register" to slave device
 i2c_send_data:
 push r0

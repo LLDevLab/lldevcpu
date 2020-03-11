@@ -7,7 +7,7 @@ entity i2c_master is
 	-- data_out - outgoing data
 	-- data_in - incoming data 
 	port(clk: in std_logic; start_send: in boolean; stop_send: in boolean; data_send: in boolean; 
-			data_out: in i2c_data8; rw_init_state: in i2c_rw; sda: inout std_logic := '1'; data_in: out i2c_data8 := X"00";
+			data_out: in i2c_data8; rw_init_state: in i2c_rw; ack_state: in i2c_ack_state; sda: inout std_logic := '1'; data_in: out i2c_data8 := X"00";
 			scl: out std_logic := '1'; ack: out std_logic := '1'; ready: out boolean := true);
 end entity;
 
@@ -173,7 +173,11 @@ begin
 				else
 					-- Sending ack
 					if(falling_scl_cnt_s = 8) then
-						sda_data_s <= '0';
+						if(ack_state = i2c_ack) then
+							sda_data_s <= '0';
+						else
+							sda_data_s <= '1';
+						end if;
 						data_in <= data_in_s;
 					end if;
 				end if;
