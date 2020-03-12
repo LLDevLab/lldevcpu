@@ -22,7 +22,7 @@ architecture i2c_arch of i2c is
 
 	component i2c_master is
 		port(clk: in std_logic; start_send: in boolean; stop_send: in boolean; data_send: in boolean; 
-				data_out: in i2c_data8; rw_init_state: in i2c_rw; sda: inout std_logic; data_in: out i2c_data8;
+				data_out: in i2c_data8; rw_init_state: in i2c_rw; ack_state: in i2c_ack_state; sda: inout std_logic; data_in: out i2c_data8;
 				scl: out std_logic; ack: out std_logic; ready: out boolean);
 	end component;
 	
@@ -36,6 +36,7 @@ architecture i2c_arch of i2c is
 	signal i2c_master_ready_s: boolean;
 	signal i2c_ready_s: boolean := true;
 	signal i2c_rw_init_state_s: i2c_rw;
+	signal i2c_ack_state_s: i2c_ack_state;
 	
 	alias i2c_enable_a: std_ulogic is control_bits(15);
 	alias i2c_dev_type_a: std_ulogic is control_bits(14);
@@ -44,17 +45,19 @@ architecture i2c_arch of i2c is
 	alias i2c_stop_send_a: std_ulogic is control_bits(9);
 	alias i2c_data_send_a: std_ulogic is control_bits(8);
 	alias i2c_rw_init_state_a: std_ulogic is control_bits(7);
+	alias i2c_ack_state_a: std_ulogic is control_bits(6);
 begin
 	i2c_clk1: i2c_clk_divider port map(clk_enable_s, clk, i2c_clk_divider_s, clk_s);
 	clk_enable_s <= true when i2c_enable_a = '1' else false;
 	i2c_clk_divider_s <= 50 when i2c_clk_divider_a = "000" else 10;
 	
-	i2c_master1: i2c_master port map(clk_s, i2c_master_start_s, i2c_master_stop_s, i2c_data_send_s, data_out, i2c_rw_init_state_s,
+	i2c_master1: i2c_master port map(clk_s, i2c_master_start_s, i2c_master_stop_s, i2c_data_send_s, data_out, i2c_rw_init_state_s, i2c_ack_state_s,
 										sda, data_in, scl, i2c_data_ack, i2c_master_ready_s);
 	i2c_master_start_s <= i2c_device_type_s = i2c_master_dt and i2c_start_send_a = '1';
 	i2c_master_stop_s <= i2c_device_type_s = i2c_master_dt and i2c_stop_send_a = '1';
 	i2c_data_send_s <= i2c_data_send_a = '1';
 	i2c_rw_init_state_s <= i2c_write when i2c_rw_init_state_a = '0' else i2c_read;
+	i2c_ack_state_s <= i2c_ack when i2c_ack_state_a = '1' else i2c_nack;
 	
 	i2c_device_type_s <= i2c_master_dt when i2c_dev_type_a = '0' else i2c_slave_dt;
 	
