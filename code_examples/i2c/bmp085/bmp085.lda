@@ -64,6 +64,20 @@ or r5, r0
 pop r0
 ldi r4, i2c_send_stop_signal
 call r4
+// save value of r0
+push r0
+// Check readed calibration
+push r5
+ldi r5, bmp085_calibration_correct
+call r5
+pop r5
+clr r4
+cmp r0, r4
+ldi r4, bmp085_get_calibrations_loop
+// restore value of r0
+pop r0
+// if calibration is not correct try to read it once more
+breq r4
 // pass second parameter to function (array index)
 push r1
 // pass first parameter to function
@@ -91,6 +105,47 @@ pop r3
 pop r2
 pop r1
 pop r0
+ret
+
+// Checks does calibration correct. Calibration cannot be 0x0000 or 0xffff
+// Arguments:
+// - Calibration value to check
+// Returns 0 if calibration is not correct and 1 if calibration is correct.
+bmp085_calibration_correct:
+push r12
+mov r12, r14
+// Not save r0 value, because it will be overwriten by return value
+push r1
+// Get first parameter from the stack
+// Set map of RAM addresses
+ldi r0, #2
+lsh r0, #28
+// Or'ing stack frame with the map
+or r0, r12
+// Parameter will have an offset r12 + 3
+ldi r1, #3
+add r0, r1
+// Load parameter's value to r1 register
+ld r1, r0
+// Checking for 0x0000
+clr r0
+cmp r1, r0
+ldi r0, bmp085_calibration_is_not_correct
+breq r0
+// Checking for 0xffff
+ldi r0, #0xffff
+cmp r1, r0
+ldi r0, bmp085_calibration_is_correct
+brne r0
+bmp085_calibration_is_not_correct:
+clr r0
+ldi r1, bmp085_calibration_correct_ret
+br r1
+bmp085_calibration_is_correct:
+ldi r0, #1
+bmp085_calibration_correct_ret:
+pop r1
+pop r12
 ret
 
 // Sending a write address to bmp085
