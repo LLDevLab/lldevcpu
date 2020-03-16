@@ -81,7 +81,7 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 0 - master
 	- 1 - slave (not supported yet)
 - Bits 13 - 11: i2c clock rate on master device (at 50Mhz FPGA clock):
-	- 000 - 1Mhz
+	- 000 - 250 kHz
 	- 001 - reserved
 	- 010 - reserved
 	- 011 - reserved
