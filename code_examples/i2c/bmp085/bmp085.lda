@@ -30,42 +30,11 @@ push r0
 ldi r4, bmp085_send_data
 call r4
 pop r0
-// read data from sensor
-// send start condition
-ldi r4, i2c_send_start_signal
-call r4
-// send bmp085 read address
-ldi r4, bmp085_send_read_addr
-call r4
-// save current value of r0
+// Save current r0 value
 push r0
-// Setting ack state to "ack"
-ldi r0, #1
-push r0
-ldi r0, i2c_set_ack_state
-call r0
-pop r0
-// receive msb of calibration
-ldi r4, i2c_receive_data
+ldi r4, bmp085_read_data
 call r4
 mov r5, r0
-lsh r5, #8
-// receive lsb of calibration
-// Setting ack state to "nack"
-clr r0
-push r0
-ldi r0, i2c_set_ack_state
-call r0
-pop r0
-// r4 still holds i2c_receive_data value
-call r4
-or r5, r0
-// restore value of r0
-pop r0
-ldi r4, i2c_send_stop_signal
-call r4
-// save value of r0
-push r0
 // Check readed calibration
 push r5
 ldi r5, bmp085_calibration_correct
@@ -73,9 +42,9 @@ call r5
 pop r5
 clr r4
 cmp r0, r4
-ldi r4, bmp085_get_calibrations_loop
-// restore value of r0
+// restore saved value of r0
 pop r0
+ldi r4, bmp085_get_calibrations_loop
 // if calibration is not correct try to read it once more
 breq r4
 // pass second parameter to function (array index)
@@ -95,9 +64,9 @@ ldi r4, bmp085_get_calibrations_loop
 cmp r1, r2
 brne r4
 // breakpoint
-//bmp085_get_calibrations_bkpt1:
-//ldi r4, bmp085_get_calibrations_bkpt1
-//br r4
+bmp085_get_calibrations_bkpt1:
+ldi r4, bmp085_get_calibrations_bkpt1
+br r4
 // Restore the stack and return from function
 pop r5
 pop r4
@@ -105,6 +74,44 @@ pop r3
 pop r2
 pop r1
 pop r0
+ret
+
+// Read data from bmp085
+// Returns the result in r0 register
+bmp085_read_data:
+// r0 will not save because it's value will be overwriten by function result
+push r1
+// send start condition
+ldi r0, i2c_send_start_signal
+call r0
+// send bmp085 read address
+ldi r0, bmp085_send_read_addr
+call r0
+// Setting ack state to "ack"
+ldi r0, #1
+push r0
+ldi r0, i2c_set_ack_state
+call r0
+pop r0
+// receive msb of calibration
+ldi r0, i2c_receive_data
+call r0
+mov r1, r0
+lsh r1, #8
+// receive lsb of calibration
+// Setting ack state to "nack"
+clr r0
+push r0
+ldi r0, i2c_set_ack_state
+call r0
+pop r0
+ldi r0, i2c_receive_data
+call r0
+or r1, r0
+ldi r0, i2c_send_stop_signal
+call r0
+// return from function
+pop r1
 ret
 
 // Checks does calibration correct. Calibration cannot be 0x0000 or 0xffff
