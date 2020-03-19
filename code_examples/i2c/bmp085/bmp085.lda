@@ -1,5 +1,5 @@
-// Get calibration of bmp085 device
-bmp085_get_calibrations:
+// Reads calibrations of bmp085 and save them into the heap
+bmp085_read_calibrations:
 push r0
 push r1
 push r2
@@ -18,7 +18,7 @@ clr r1
 ldi r2, #11
 ldi r3, #1
 // Send calibration registers msb
-bmp085_get_calibrations_loop:
+bmp085_read_calibrations_loop:
 // send start condition
 ldi r4, i2c_send_start_signal
 call r4
@@ -44,7 +44,7 @@ clr r4
 cmp r0, r4
 // restore saved value of r0
 pop r0
-ldi r4, bmp085_get_calibrations_loop
+ldi r4, bmp085_read_calibrations_loop
 // if calibration is not correct try to read it once more
 breq r4
 // pass second parameter to function (array index)
@@ -60,13 +60,9 @@ add r0, r3
 add r0, r3
 // increment loop counter by 1
 add r1, r3
-ldi r4, bmp085_get_calibrations_loop
+ldi r4, bmp085_read_calibrations_loop
 cmp r1, r2
 brne r4
-// breakpoint
-bmp085_get_calibrations_bkpt1:
-ldi r4, bmp085_get_calibrations_bkpt1
-br r4
 // Restore the stack and return from function
 pop r5
 pop r4
@@ -209,6 +205,78 @@ pop r1
 ldi r1, i2c_send_data
 call r1
 // Restore the stack and return from function
+pop r1
+pop r0
+pop r12
+ret
+
+// Reads temperature raw value from sensor
+// Returns temperature raw value
+bmp085_get_raw_temperature:
+// Will not save r0, because return value will overwrite it
+push r1
+push r2
+push r3
+// send start condition
+ldi r0, i2c_send_start_signal
+call r0
+// send bmp085 write address
+ldi r0, bmp085_send_write_addr
+call r0
+// send address of bmp085 control register
+ldi r0, #0xf4
+push r0
+ldi r0, bmp085_send_data
+call r0
+pop r0
+// Send value, that should be written to bmp085 control register (to read temperature, this value should be 0x2e)
+ldi r0, #0x2e
+push r0
+ldi r0, bmp085_send_data
+call r0
+pop r0
+ldi r0, i2c_send_stop_signal
+call r0
+// wait for 5 ms
+ldi r0, lldevcpu_wait_one_ms
+ldi r1, #1
+ldi r2, #5
+ldi r3, bmp085_get_temperature_wait_loop
+bmp085_get_temperature_wait_loop:
+call r0
+sub r2, r1
+brne r3
+// Read temperature raw value
+ldi r0, bmp085_read_data
+call r0
+// return from function
+pop r3
+pop r2
+pop r1
+ret
+
+// Calculates actual temperature from it's raw value
+// Arguments:
+//	- Temperature raw value
+// Returns actual temperature
+bmp085_calc_temperature:
+push r12
+mov r12, r14
+push r0
+push r1
+// Get first parameter from the stack
+// Set map of RAM addresses
+ldi r0, #2
+lsh r0, #28
+// Or'ing stack frame with the map
+or r0, r12
+// Parameter will have an offset r12 + 3
+ldi r1, #3
+add r0, r1
+// Load parameter's value to r1 register
+ld r1, r0
+// Calculate actual temperature value
+// Return from function
 pop r1
 pop r0
 pop r12

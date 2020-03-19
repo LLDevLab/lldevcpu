@@ -1,7 +1,7 @@
 // Returns an address of peripherial's register
 // Arguments:
 // 	- An offset
-get_periph_addr:
+lldevcpu_get_periph_addr:
 push r12
 // Create the stack frame
 // Move current SP value to r12 register
@@ -32,7 +32,7 @@ ret
 // Arguments:
 // 	- An offset 
 // 	- A value to store
-set_ram_val:
+lldevcpu_set_ram_val:
 push r12
 mov r12, r14
 push r0
@@ -75,7 +75,7 @@ ret
 // Returns RAM value, stored within specified offset
 // Arguments:
 // 	- An offset 
-get_ram_val:
+lldevcpu_get_ram_val:
 push r12
 mov r12, r14
 push r1
@@ -103,4 +103,20 @@ pop r3
 pop r2
 pop r1
 pop r12
+ret
+
+// Waiting for approximately 1 ms
+lldevcpu_wait_one_ms:
+push r0
+push r1
+push r2
+ldi r0, #0xa2c2
+ldi r1, #1
+ldi r2, wait_one_ms_loop
+wait_one_ms_loop:
+sub r0, r1
+brne r2
+pop r2
+pop r1
+pop r0
 ret

@@ -1,0 +1,15 @@
+// Multiply 2 values
+// Arguments:
+// - value1
+// - value2
+// Returns multiplication result
+math_mul:
+ret
+
+// Divide value1 by value2
+// Arguments:
+// - value1
+// - value2
+// - Returns integer part of division in r0 and division remainder in r1 register
+math_div:
+ret

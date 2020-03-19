@@ -1,10 +1,16 @@
 main:
 ldi r0, i2c_enable
 call r0
-ldi r0, bmp085_get_calibrations
+ldi r0, bmp085_read_calibrations
 call r0
 // In loop I should read data from sensor and calculate actual values
-main_loop:
 ldi r1, main_loop
+main_loop:
+ldi r0, bmp085_get_raw_temperature
+call r0
+push r0
+ldi r0, bmp085_calc_temperature
+call r0
+pop r0
 br r1
 ret

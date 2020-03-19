@@ -308,7 +308,7 @@ i2c_get_status_reg_addr:
 push r1
 ldi r1, #0x07
 push r1
-ldi r0, get_periph_addr
+ldi r0, lldevcpu_get_periph_addr
 call r0
 pop r1
 // return from function
@@ -320,7 +320,7 @@ i2c_get_data_reg_addr:
 push r1
 ldi r1, #0x06
 push r1
-ldi r0, get_periph_addr
+ldi r0, lldevcpu_get_periph_addr
 call r0
 pop r1
 // return from function
@@ -332,7 +332,7 @@ i2c_get_addr_reg_addr:
 push r1
 ldi r1, #0x05
 push r1
-ldi r0, get_periph_addr
+ldi r0, lldevcpu_get_periph_addr
 call r0
 pop r1
 // return from function
@@ -344,7 +344,7 @@ i2c_get_ctrl_reg_addr:
 push r1
 ldi r1, #0x04
 push r1
-ldi r0, get_periph_addr
+ldi r0, lldevcpu_get_periph_addr
 call r0
 pop r1
 // return from function
