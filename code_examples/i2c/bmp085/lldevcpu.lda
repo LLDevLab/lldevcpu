@@ -18,10 +18,10 @@ ldi r2, #3
 add r0, r2
 // Load parameter's value to r2 register
 ld r2, r0
-// Set map of Peripherials
+// Set map of Peripherals
 ldi r0, #0x300000
 lsh r0, #8
-// Add offset to peripherials address
+// Add offset to peripherals address
 or r0, r2
 // Exit from function
 pop r2

@@ -17,7 +17,7 @@ clr r1
 // 22 because 11 msb values and 11 lsb values
 ldi r2, #11
 ldi r3, #1
-// Send calibration registers msb
+// Send calibration register's msb
 bmp085_read_calibrations_loop:
 // send start condition
 ldi r4, i2c_send_start_signal
@@ -35,7 +35,7 @@ push r0
 ldi r4, bmp085_read_data
 call r4
 mov r5, r0
-// Check readed calibration
+// Check read calibration
 push r5
 ldi r5, bmp085_calibration_correct
 call r5
@@ -75,7 +75,7 @@ ret
 // Read data from bmp085
 // Returns the result in r0 register
 bmp085_read_data:
-// r0 will not save because it's value will be overwriten by function result
+// r0 will not save because it's value will be overwritten by function result
 push r1
 // send start condition
 ldi r0, i2c_send_start_signal
@@ -117,7 +117,7 @@ ret
 bmp085_calibration_correct:
 push r12
 mov r12, r14
-// Not save r0 value, because it will be overwriten by return value
+// Not save r0 value, because it will be overwritten by return value
 push r1
 // Get first parameter from the stack
 // Set map of RAM addresses

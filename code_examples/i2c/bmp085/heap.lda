@@ -1,4 +1,4 @@
-// Saves colibration value to heap
+// Save calibration value to heap
 // Parameters:
 // 1 - The calibration to save
 // 2 - Index of an array where to save calibration

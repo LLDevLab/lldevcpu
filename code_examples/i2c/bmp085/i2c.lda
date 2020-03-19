@@ -5,7 +5,7 @@ push r1
 // reading current i2c control register value
 ldi r0, i2c_get_ctrl_reg_val
 call r0
-// Clear bit 8 (Data send bit) in i2c control resister
+// Clear bit 8 (Data send bit) in i2c control register
 mov r1, r0
 ldi r0, #0xfeff
 and r0, r1
@@ -13,7 +13,7 @@ push r0
 ldi r0, i2c_set_ctrl_reg_val
 call r0
 pop r0
-// Setting bits 7 (R/W state) and 8 (Data send bit) in i2c control resister
+// Setting bits 7 (R/W state) and 8 (Data send bit) in i2c control register
 // for reading data from i2c r/w state flag should be set to 1
 ldi r1, #0x180
 or r0, r1
@@ -82,7 +82,7 @@ ret
 i2c_send_data:
 push r0
 push r1
-// Clear bit 8 (Data send bit) and 7th (R/W state bit) in i2c control resister
+// Clear bit 8 (Data send bit) and 7th (R/W state bit) in i2c control register
 // Bit 7 should be 0 for write operations
 ldi r0, i2c_get_ctrl_reg_val
 call r0
@@ -92,7 +92,7 @@ push r0
 ldi r0, i2c_set_ctrl_reg_val
 call r0
 pop r0
-// Set bit 8 (Data send bit) in i2c control resister
+// Set bit 8 (Data send bit) in i2c control register
 ldi r1, #0x100
 or r0, r1
 push r0
@@ -244,7 +244,7 @@ push r1
 ldi r0, i2c_get_data_reg_addr
 call r0
 mov r1, r0
-// Load data from i2c data registyer to r0
+// Load data from i2c data register to r0
 ld r0, r1
 pop r1
 ret
