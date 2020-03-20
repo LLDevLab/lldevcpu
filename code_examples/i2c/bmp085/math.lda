@@ -3,7 +3,65 @@
 // - value1
 // - value2
 // Returns multiplication result
-math_mul:
+math_mul_unsign:
+push r12
+mov r12, r14
+push r1
+push r2
+push r3
+push r4
+// Get first parameter from the stack
+// Set map of RAM addresses
+ldi r0, #2
+lsh r0, #28
+// Or'ing stack frame with the map
+or r0, r12
+// First parameter will have an offset r12 + 3
+ldi r1, #3
+add r0, r1
+// Load first parameter's value to r1 register
+ld r1, r0
+// Second parameter will have an offset r12 + 4
+ldi r2, #4
+add r0, r2
+// Load second parameter's value to r2 register
+ld r2, r0
+// Clear return value
+clr r0
+cmp r1, r2
+ldi r3, math_mul_unsign_lt_br
+brltu r3
+// greater than branch
+mov r3, r1
+mov r4, r2
+ldi r1, math_mul_unsign_loop
+br r1
+// less than branch
+math_mul_unsign_lt_br:
+mov r3, r2
+mov r4, r1
+math_mul_unsign_loop:
+// r3 - contains lesser value (will be a counter)
+// r4 - contains greater value
+clr r1
+// if r3 is zero, return from function
+cmp r3, r1
+ldi r1, math_mul_unsign_ret
+breq r1
+ldi r2, #1
+// Decrement a counter
+sub r3, r2
+// Add r4 to return value
+add r0, r4
+ldi r1, math_mul_unsign_loop
+br r1
+math_mul_unsign_ret:
+// Return from function
+pop r4
+pop r3
+pop r2
+pop r1
+pop r12
 ret
 
 // Divide value1 by value2
@@ -11,5 +69,67 @@ ret
 // - value1
 // - value2
 // - Returns integer part of division in r0 and division remainder in r1 register
-math_div:
+math_div_unsign:
+push r12
+mov r12, r14
+// values will be returned in r0 and r1 registers, so I'm not save their values to the stack
+push r2
+push r3
+push r4
+push r5
+// Get first parameter from the stack
+// Set map of RAM addresses
+ldi r0, #2
+lsh r0, #28
+// Or'ing stack frame with the map
+or r0, r12
+// First parameter will have an offset r12 + 3
+ldi r1, #3
+add r0, r1
+// Load first parameter's value to r1 register
+ld r1, r0
+// Second parameter will have an offset r12 + 4
+ldi r2, #4
+add r0, r2
+// Load second parameter's value to r2 register
+ld r2, r0
+cmp r1, r2
+ldi r3, math_div_unsign_lt_br
+brltu r3
+// greater than branch
+mov r3, r1
+mov r4, r2
+ldi r1, math_div_unsign_pre_loop
+br r1
+// less than branch
+math_div_unsign_lt_br:
+mov r3, r2
+mov r4, r1
+math_div_unsign_pre_loop:
+// Clear return values
+clr r0
+clr r1
+// if r3 (smallest number) is zero, return from function
+clr r5
+cmp r3, r5
+ldi r5, math_div_unsign_ret
+breq r5
+math_div_unsign_loop:
+// r3 - contains lesser value (will be a counter)
+// r4 - contains greater value
+ldi r5, #1
+add r0, r5
+sub r4, r3
+cmp r3, r4
+ldi r5, math_div_unsign_loop
+brltu r5
+// move reminder to r1 register
+mov r1, r4
+math_div_unsign_ret:
+// Return from function
+pop r5
+pop r4
+pop r3
+pop r2
+pop r12
 ret
