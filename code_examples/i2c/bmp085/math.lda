@@ -76,7 +76,6 @@ mov r12, r14
 push r2
 push r3
 push r4
-push r5
 // Get first parameter from the stack
 // Set map of RAM addresses
 ldi r0, #2
@@ -84,38 +83,36 @@ lsh r0, #28
 // Or'ing stack frame with the map
 or r0, r12
 // First parameter will have an offset r12 + 3
-ldi r5, #3
-add r5, r0
-// Load first parameter's value to r3 register
-ld r3, r5
+ldi r4, #3
+add r4, r0
+// Load first parameter's value to r2 register
+ld r2, r4
 // Second parameter will have an offset r12 + 4
-ldi r5, #4
-add r5, r0
-// Load second parameter's value to r4 register
-ld r4, r5
+ldi r4, #4
+add r4, r0
+// Load second parameter's value to r3 register
+ld r3, r4
 // Clear return values
 clr r0
 clr r1
-// if value2 (r4 register) is zero, return from function
-cmp r4, r1
-ldi r5, math_div_unsign_ret
-breq r5
+// if value2 (r3 register) is zero, return from function (cannot divide by 0)
+cmp r3, r1
+ldi r4, math_div_unsign_ret
+breq r4
 math_div_unsign_loop:
-// breaking the loop if value in r3 less than value in r4
-cmp r3, r4
-ldi r5, math_div_unsign_ret
-// if value in r3 less than value in r4, then branch
-brltu r5
-ldi r5, #1
-add r0, r5
-sub r3, r4
-ldi r5, math_div_unsign_loop
-br r5
+cmp r2, r3
+ldi r4, math_div_unsign_ret
+// if value in r2 (dividend) less than value in r3 (divider), then branch
+brltu r4
+ldi r4, #1
+add r0, r4
+sub r2, r3
+ldi r4, math_div_unsign_loop
+br r4
 math_div_unsign_ret:
 // move reminder to r1 register
-mov r1, r4
+mov r1, r2
 // Return from function
-pop r5
 pop r4
 pop r3
 pop r2
