@@ -3,14 +3,17 @@ ldi r0, i2c_enable
 call r0
 ldi r0, bmp085_read_calibrations
 call r0
-// In loop I should read data from sensor and calculate actual values
 ldi r1, main_loop
 main_loop:
 ldi r0, bmp085_get_raw_temperature
 call r0
+// Calculate actual temperature value
 push r0
 ldi r0, bmp085_calc_temperature
 call r0
+// Move result to r2 register
+mov r2, r0
 pop r0
+// Send result via UART here
 br r1
 ret

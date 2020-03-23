@@ -262,8 +262,9 @@ ret
 bmp085_calc_temperature:
 push r12
 mov r12, r14
-push r0
 push r1
+push r2
+push r3
 // Get first parameter from the stack
 // Set map of RAM addresses
 ldi r0, #2
@@ -275,9 +276,86 @@ ldi r1, #3
 add r0, r1
 // Load parameter's value to r1 register
 ld r1, r0
+// r1 - UT
+// r2 - AC6
+// r3 - AC5
 // Calculate actual temperature value
-// Return from function
-pop r1
+// Read AC6 from the heap
+ldi r0, #5
+push r0
+ldi r0, heap_get
+call r0
+mov r2, r0
 pop r0
+// Read AC5 from the heap
+ldi r0, #4
+push r0
+ldi r0, heap_get
+call r0
+mov r3, r0
+pop r0
+// Calculate X1 value (X1=(UT-AC6)*AC5/2^15)
+// AC5/2^15
+rsh r3, #15
+// UT-AC6
+sub r1, r2
+// X1=(UT-AC6)*AC5/2^15
+push r1
+push r3
+ldi r1, math_mul_unsign
+call r1
+pop r3
+pop r1
+// Save X1 in r1 register
+mov r1, r0
+// Calculate X2 value (X2=MC*2^11/(X1+MD))
+// r2 - MC
+// r3 - MD
+// Get MC value
+ldi r0, #9
+push r0
+ldi r0, heap_get
+call r0
+mov r2, r0
+pop r0
+// Get MD value
+ldi r0, #10
+push r0
+ldi r0, heap_get
+call r0
+mov r3, r0
+pop r0
+// MC*2^11
+lsh r2, #11
+// X1+MD
+add r3, r1
+// X2=MC*2^11/(X1+MD)
+// Save value of r1 register
+push r1
+// Pass second parameter to function
+push r3
+// Pass first parameter to function
+push r2
+ldi r2, math_div_unsign
+call r2
+pop r2
+pop r3
+// Do not need reminder value, so restore previous value of r1 register
+pop r1
+// Move integer division result to r2 register
+mov r2, r0
+// B5=X1+X2
+add r1, r2
+// T=(B5+8)/2^4
+// B5+8
+ldi r2, #8
+add r1, r2
+rsh r1, #4
+// Move calculation result to r0 register
+mov r0, r1
+// Return from function
+pop r3
+pop r2
+pop r1
 pop r12
 ret
