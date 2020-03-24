@@ -210,6 +210,31 @@ pop r0
 pop r12
 ret
 
+// Reads raw temperature
+// Returns raw temperature value
+bmp085_read_raw_temperature:
+push r1
+// r0 - register, that holds temporary values
+// r1 - bmp085 register address to read
+// 0xf6 - 16 bit bmp085 register address where sensor value will be stored before sending to master device (that address should be send in read request)
+ldi r1, #0xf6
+// send start condition
+ldi r0, i2c_send_start_signal
+call r0
+// send bmp085 write address
+ldi r0, bmp085_send_write_addr
+call r0
+// send bmp085 register address to read
+push r1
+ldi r0, bmp085_send_data
+call r0
+pop r1
+ldi r0, bmp085_read_data
+call r0
+// Restore the stack and return from function
+pop r1
+ret
+
 // Reads temperature raw value from sensor
 // Returns temperature raw value
 bmp085_get_raw_temperature:
@@ -247,7 +272,7 @@ call r0
 sub r2, r1
 brne r3
 // Read temperature raw value
-ldi r0, bmp085_read_data
+ldi r0, bmp085_read_raw_temperature
 call r0
 // return from function
 pop r3
