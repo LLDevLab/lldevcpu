@@ -1,2 +1,2 @@
 To compile this program, run lldev compiler with such parameters (main.lda should always be first):
-LLDevCompiler.exe main.lda lldevcpu.lda i2c.lda bmp085.lda heap.lda
+LLDevCompiler.exe main.lda lldevcpu.lda i2c.lda bmp085.lda heap.lda uart.lda
