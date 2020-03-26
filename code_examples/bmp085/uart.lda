@@ -1,4 +1,4 @@
-// Sending data via UART and enable UART tx if needed
+// Sending data (8bit) from UART data output register via UART and enable UART tx if needed
 uart_send_data:
 push r0
 push r1
