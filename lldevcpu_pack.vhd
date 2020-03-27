@@ -60,7 +60,7 @@ package lldevcpu_pack is
 	
 	-- UART control register bits
 	constant uart_tx_enable_bit: integer := 15;
-	constant uart_tx_started_bit: integer := 12;
+	constant uart_tx_started_bit: integer := 10;
 	
 	constant max_addr_msb_num: integer := rom_addr_msb_num;
 	

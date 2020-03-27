@@ -25,7 +25,6 @@ architecture uart_arch of uart is
 	signal tx_clk_enable_s: boolean;
 	signal uart_baud_rate_s: baud_rate := 2_604;
 	signal uart_clk_s: std_logic := '0';
-	signal tx_data_s: data8;
 	signal tx_ready_s: boolean := true;
 	signal uat_ready_s: boolean;
 	
@@ -46,7 +45,7 @@ begin
 	tx_ready <= tx_ready_s;
 	uart_tx_delay: uart_clk_divider port map(tx_clk_enable_s, clk, uart_baud_rate_s, uart_clk_s);
 
-	uat1: uat port map(uart_clk_s, tx_enable_s, tx_data_s, bit_out, uat_ready_s);
+	uat1: uat port map(uart_clk_s, tx_enable_s, tx_data, bit_out, uat_ready_s);
 	
 	transmit_proc: process(clk, tx_enable_a, tx_started_a, uat_ready_s)
 		variable tx_started_v: boolean;
@@ -55,7 +54,6 @@ begin
 	begin
 		if(tx_enable_a = '1' and falling_edge(clk)) then						
 			if(uat_ready_s and not tx_started_v) then
-				tx_data_s <= tx_data;
 				tx_enable_v := true;				
 				tx_started_v := true;
 				tx_ready_s <= false;
