@@ -57,7 +57,7 @@ Peripherial registers mapped to addresses starting from 0x30000000.
 	- 101 - reserved
 	- 110 - 115200
 	- 111 - reserved
-- Bit 12: Send data bit. Setting this bit to 1, will start transferring data
+- Bit 10: Send data bit. Setting this bit to 1, will start transferring data
 	
 #### UART data output register
 - 16 bit register to store outgoing data
