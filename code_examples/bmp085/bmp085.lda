@@ -231,6 +231,9 @@ call r0
 pop r1
 ldi r0, bmp085_read_data
 call r0
+// Waiting while i2c bus will be ready
+//ldi r1, i2c_wait
+//call r1
 // Restore the stack and return from function
 pop r1
 ret

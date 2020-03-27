@@ -12,7 +12,8 @@ call r0
 //ldi r0, bmp085_calc_temperature
 //call r0
 // Move result to r2 register
-mov r2, r0
+//mov r2, r0
+ldi r2, #0x14
 //pop r0
 // Send temperature via UART
 push r2
@@ -20,8 +21,6 @@ ldi r0, uart_set_data
 call r0
 pop r2
 ldi r0, uart_send_data
-call r0
-ldi r0, uart_wait
 call r0
 br r1
 ret

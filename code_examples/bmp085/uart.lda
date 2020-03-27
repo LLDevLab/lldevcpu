@@ -15,24 +15,24 @@ ldi r1, #0xefff
 and r1, r0
 push r1
 ldi r1, uart_set_ctrl_reg_val
+call r1
 pop r1
 // Set bit 12 in "UART control register"
 ldi r1, #0x1000
 or r1, r0
 push r1
 ldi r1, uart_set_ctrl_reg_val
+call r1
 pop r1
 ldi r1, uart_send_data_ret
 br r1
 // Enable UART transmitter (this will also start transmission of first byte)
 uart_send_data_by_tx_enable:
-ldi r1, #0x8000
-or r1, r0
-push r1
-ldi r1, uart_set_ctrl_reg_val
+ldi r1, uart_tx_enable
 call r1
-pop r1
 uart_send_data_ret:
+ldi r0, uart_wait
+call r0
 // Return from function
 pop r1
 pop r0
