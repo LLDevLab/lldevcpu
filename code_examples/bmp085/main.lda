@@ -1,6 +1,8 @@
 main:
 ldi r0, i2c_enable
 call r0
+ldi r0, uart_tx_enable
+call r0
 ldi r0, bmp085_read_calibrations
 call r0
 ldi r1, main_loop
