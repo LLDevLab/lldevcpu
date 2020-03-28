@@ -31,28 +31,30 @@ begin
 		variable parity_bit: std_logic := '0';
 		variable data_v: std_logic_vector(7 downto 0) := "00000000";
 	begin
-		if(rising_edge(clk) and (enable or not ready)) then
-			ready_v := false;
-			
-			case clk_cnt is
-				when 0 =>
-					bit_out <= '0';					-- pull uart down to signal of transmission start
-					data_v := data;
-				when (max_cnt - 1) =>
-					bit_out <= parity_bit;
-				when max_cnt =>
-					bit_out <= '1';					-- end of transmission
-					ready_v := true;
-				when others =>
-					parity_bit := get_parity_bit(data_v(clk_cnt - 1), parity_bit);
-					bit_out <= data_v(clk_cnt - 1);
-			end case;
-			
-			if(clk_cnt < max_cnt) then
-				clk_cnt := clk_cnt + 1;
-			else
-				clk_cnt := 0;
-				parity_bit := '0';
+		if(rising_edge(clk)) then
+			if(enable or not ready) then
+				ready_v := false;
+				
+				case clk_cnt is
+					when 0 =>
+						bit_out <= '0';					-- pull uart down to signal of transmission start
+						data_v := data;
+					when (max_cnt - 1) =>
+						bit_out <= parity_bit;
+					when max_cnt =>
+						bit_out <= '1';					-- end of transmission
+						ready_v := true;
+					when others =>
+						parity_bit := get_parity_bit(data_v(clk_cnt - 1), parity_bit);
+						bit_out <= data_v(clk_cnt - 1);
+				end case;
+				
+				if(clk_cnt < max_cnt) then
+					clk_cnt := clk_cnt + 1;
+				else
+					clk_cnt := 0;
+					parity_bit := '0';
+				end if;
 			end if;
 			
 			ready <= ready_v;
