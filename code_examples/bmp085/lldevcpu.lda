@@ -28,15 +28,15 @@ pop r2
 pop r12
 ret
 
-// Waiting for approximately 1 ms
-lldevcpu_wait_one_ms:
+// Waiting for approximately 5 ms
+lldevcpu_wait_5_ms:
 push r0
 push r1
 push r2
 ldi r0, #0xa2c2
 ldi r1, #1
-ldi r2, wait_one_ms_loop
-wait_one_ms_loop:
+ldi r2, lldevcpu_wait_5_ms_loop
+lldevcpu_wait_5_ms_loop:
 sub r0, r1
 brne r2
 pop r2

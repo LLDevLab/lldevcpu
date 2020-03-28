@@ -266,14 +266,8 @@ pop r0
 ldi r0, i2c_send_stop_signal
 call r0
 // wait for 5 ms
-ldi r0, lldevcpu_wait_one_ms
-ldi r1, #1
-ldi r2, #5
-ldi r3, bmp085_get_temperature_wait_loop
-bmp085_get_temperature_wait_loop:
+ldi r0, lldevcpu_wait_5_ms
 call r0
-sub r2, r1
-brne r3
 // Read temperature raw value
 ldi r0, bmp085_read_raw_temperature
 call r0
