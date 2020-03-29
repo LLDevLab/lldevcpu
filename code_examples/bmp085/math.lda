@@ -118,3 +118,101 @@ pop r3
 pop r2
 pop r12
 ret
+
+// Extends a sign bit of a short (16bit) value
+// Returns sign extended value
+// Arguments:
+// - Value to extend a sign
+math_short_sign_extend:
+push r12
+mov r12, r14
+push r1
+// Get parameter from the stack
+// Set map of RAM addresses
+ldi r1, #2
+lsh r1, #28
+// Or'ing stack frame with the map
+or r1, r12
+// Parameter will have an offset r12 + 3
+ldi r0, #3
+add r1, r0
+// Load parameter's value to r0 register
+ld r0, r1
+// Extend 15'th bit of the value
+mov r1, r0
+rsh r1, #14
+// rsh set zero bit if result is 0
+ldi r1, math_short_sign_extend_one
+brne r1
+// extend 0
+ldi r1, #0xffff
+// Clrear bits 31-16
+and r0, r1
+ldi r1, math_short_sign_extend_ret
+br r1
+// extend 1
+math_short_sign_extend_one:
+ldi r1, #0xffff
+lsh r1, #16
+// Set bits 31-16
+or r0, r1
+// Return from function
+math_short_sign_extend_ret:
+pop r1
+pop r12
+ret
+
+// Return a 2'th complement value of a parameter
+// Arguments:
+// - Value for getting 2'th complement 
+math_get_2th_complement:
+push r12
+mov r12, r14
+push r1
+// Get parameter from the stack
+// Set map of RAM addresses
+ldi r1, #2
+lsh r1, #28
+// Or'ing stack frame with the map
+or r1, r12
+// Parameter will have an offset r12 + 3
+ldi r0, #3
+add r1, r0
+// Load parameter's value to r0 register
+ld r0, r1
+// Calculate 2'th complement
+ldi r1, #1
+not r0
+add r0, r1
+// Return from function
+pop r1
+pop r12
+ret
+
+// Checks, does parameter negative
+// Arguments:
+// - Value to check
+// Returns:
+// 0 - if not negative
+// 1 - if negative
+math_is_long_negative:
+push r12
+mov r12, r14
+push r1
+// Get parameter from the stack
+// Set map of RAM addresses
+ldi r1, #2
+lsh r1, #28
+// Or'ing stack frame with the map
+or r1, r12
+// Parameter will have an offset r12 + 3
+ldi r0, #3
+add r1, r0
+// Load parameter's value to r0 register
+ld r0, r1
+// Only 31'nd bit will remain
+rsh r0, #31
+// Return from function
+pop r1
+pop r12
+ret
