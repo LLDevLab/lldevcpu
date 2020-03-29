@@ -316,17 +316,17 @@ call r0
 mov r3, r0
 pop r0
 // Calculate X1 value (X1=(UT-AC6)*AC5/2^15)
-// AC5/2^15
-rsh r3, #15
 // UT-AC6
 sub r1, r2
-// X1=(UT-AC6)*AC5/2^15
+// (UT-AC6)*AC5
 push r1
 push r3
 ldi r1, math_mul_unsign
 call r1
 pop r3
 pop r1
+// X1=(UT-AC6)*AC5/2^15
+rsh r0, #15
 // Save X1 in r1 register
 mov r1, r0
 // Calculate X2 value (X2=MC*2^11/(X1+MD))
@@ -371,6 +371,7 @@ add r1, r2
 // B5+8
 ldi r2, #8
 add r1, r2
+// T=(B5+8)/2^4
 rsh r1, #4
 // Move calculation result to r0 register
 mov r0, r1
