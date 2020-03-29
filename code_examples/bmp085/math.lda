@@ -66,8 +66,8 @@ ret
 
 // Divide value1 by value2
 // Arguments:
-// - value1
-// - value2
+// - Dividend
+// - Divider
 // - Returns integer part of division in r0 and division remainder in r1 register
 math_div_unsign:
 push r12
@@ -76,7 +76,7 @@ mov r12, r14
 push r2
 push r3
 push r4
-// Get first parameter from the stack
+// Get parameters from the stack
 // Set map of RAM addresses
 ldi r0, #2
 lsh r0, #28
@@ -85,12 +85,12 @@ or r0, r12
 // First parameter will have an offset r12 + 3
 ldi r4, #3
 add r4, r0
-// Load first parameter's value to r2 register
+// Load first parameter's value (dividend) to r2 register
 ld r2, r4
 // Second parameter will have an offset r12 + 4
 ldi r4, #4
 add r4, r0
-// Load second parameter's value to r3 register
+// Load second parameter's value (divider) to r3 register
 ld r3, r4
 // Clear return values
 clr r0
@@ -107,6 +107,9 @@ brltu r4
 ldi r4, #1
 add r0, r4
 sub r2, r3
+// If r2 and r3 are equal, then exit from function
+ldi r4, math_div_unsign_ret
+breq r4
 ldi r4, math_div_unsign_loop
 br r4
 math_div_unsign_ret:
@@ -140,7 +143,7 @@ add r1, r0
 ld r0, r1
 // Extend 15'th bit of the value
 mov r1, r0
-rsh r1, #14
+rsh r1, #15
 // rsh set zero bit if result is 0
 ldi r1, math_short_sign_extend_one
 brne r1

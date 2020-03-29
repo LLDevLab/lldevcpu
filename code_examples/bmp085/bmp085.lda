@@ -286,6 +286,8 @@ mov r12, r14
 push r1
 push r2
 push r3
+push r4
+push r5
 // Get first parameter from the stack
 // Set map of RAM addresses
 ldi r0, #2
@@ -339,6 +341,13 @@ ldi r0, heap_get
 call r0
 mov r2, r0
 pop r0
+// Extend sign of MC value
+push r2
+ldi r0, math_short_sign_extend
+call r0
+pop r2
+// Move result to r2
+mov r2, r0
 // Get MD value
 ldi r0, #10
 push r0
@@ -346,11 +355,55 @@ ldi r0, heap_get
 call r0
 mov r3, r0
 pop r0
+// Extend sign of MD value
+push r3
+ldi r0, math_short_sign_extend
+call r0
+pop r3
+// Move result to r2
+mov r3, r0
 // MC*2^11
 lsh r2, #11
 // X1+MD
 add r3, r1
 // X2=MC*2^11/(X1+MD)
+// Checking sign of MC*2^11
+push r2
+ldi r0, math_is_long_negative
+call r0
+pop r2
+// Save result to r4
+mov r4, r0
+// Checking sign of (X1+MD)
+push r3
+ldi r0, math_is_long_negative
+call r0
+pop r3
+// Save result to r5
+mov r5, r0
+// If first value is positive, then do nothing, otherwise convert it to positive value
+clr r0
+cmp r4, r0
+ldi r0, bmp085_calc_temperature_check_divider
+breq r0
+push r2
+ldi r0, math_get_2th_complement
+call r0
+pop r2
+// Move the result to r2
+mov r2, r0
+// If second value is positive, then do nothing, otherwise convert it to positive value
+bmp085_calc_temperature_check_divider:
+clr r0
+cmp r5, r0
+ldi r0, bmp085_calc_temperature_x2
+breq r0
+push r3
+ldi r0, math_get_2th_complement
+call r0
+pop r3
+mov r3, r0
+bmp085_calc_temperature_x2:
 // Save value of r1 register
 push r1
 // Pass second parameter to function
@@ -361,10 +414,28 @@ ldi r2, math_div_unsign
 call r2
 pop r2
 pop r3
-// Do not need reminder value, so restore previous value of r1 register
-pop r1
 // Move integer division result to r2 register
 mov r2, r0
+// Do not need reminder value, so restore previous value of r1 register
+pop r1
+// Convert division result to negative if needed
+// If both values were positive, then result is positive value
+mov r0, r4
+or r0, r5
+ldi r0, bmp085_calc_temperature_b5
+breq r0
+// If both values were negative, then result is positive value
+mov r0, r4
+and r0, r5
+ldi r0, bmp085_calc_temperature_b5
+brne r0
+// Otherwise convert the result to negative value
+push r2
+ldi r0, math_get_2th_complement
+call r0
+pop r2
+mov r2, r0
+bmp085_calc_temperature_b5:
 // B5=X1+X2
 add r1, r2
 // T=(B5+8)/2^4
@@ -376,6 +447,8 @@ rsh r1, #4
 // Move calculation result to r0 register
 mov r0, r1
 // Return from function
+pop r5
+pop r4
 pop r3
 pop r2
 pop r1
