@@ -1,0 +1,45 @@
+// Returns an address of peripherial's register
+// Arguments:
+// 	- An offset
+lldevcpu_get_periph_addr:
+push r12
+// Create the stack frame
+// Move current SP value to r12 register
+mov r12, r14
+push r2
+// Get parameter from the stack
+// Set map of RAM addresses
+ldi r0, #2
+lsh r0, #28
+// Or'ing stack frame with the map
+or r0, r12
+// First parameter will have an offset r12 + 3
+ldi r2, #3
+add r0, r2
+// Load parameter's value to r2 register
+ld r2, r0
+// Set map of Peripherals
+ldi r0, #0x300000
+lsh r0, #8
+// Add offset to peripherals address
+or r0, r2
+// Exit from function
+pop r2
+pop r12
+ret
+
+// Waiting for approximately 5 ms
+lldevcpu_wait_5_ms:
+push r0
+push r1
+push r2
+ldi r0, #0xa2c2
+ldi r1, #1
+ldi r2, lldevcpu_wait_5_ms_loop
+lldevcpu_wait_5_ms_loop:
+sub r0, r1
+brne r2
+pop r2
+pop r1
+pop r0
+ret

@@ -1,0 +1,182 @@
+// Sending data (8bit) from UART data output register via UART and enable UART tx if needed
+uart_send_data:
+push r0
+push r1
+ldi r1, uart_get_ctrl_reg_val
+call r1
+// Clear bit 10 in "UART control register"
+ldi r1, #0xfbff
+and r1, r0
+push r1
+ldi r1, uart_set_ctrl_reg_val
+call r1
+pop r1
+// Set bit 10 in "UART control register"
+ldi r1, #0x400
+or r1, r0
+push r1
+ldi r1, uart_set_ctrl_reg_val
+call r1
+pop r1
+ldi r0, uart_wait
+call r0
+// Return from function
+pop r1
+pop r0
+ret
+
+// Waiting until UART bus will be ready to use
+uart_wait:
+push r0
+push r1
+ldi r1, #0x8000
+uart_wait_loop:
+// Get uart status register's value
+ldi r0, uart_get_status_reg_val
+call r0
+// Looping while bit 15 (uart bus status) equal to 0
+and r0, r1
+// previous operation will set zero bit if bit 15 in r0 register is 0
+ldi r0, uart_wait_loop
+breq r0
+pop r1
+pop r0
+ret
+
+// Set bit 15 of uart control register
+uart_tx_enable:
+push r0
+push r1
+ldi r0, uart_get_ctrl_reg_val
+call r0
+ldi r1, #0x8000
+or r0, r1
+push r0
+ldi r0, uart_set_ctrl_reg_val
+call r0
+pop r0
+// Return from function
+pop r1
+pop r0
+ret
+
+// Set a value to UART Control Register
+// Arguments:
+// 	- A value to set
+uart_set_ctrl_reg_val:
+push r12
+mov r12, r14
+push r0
+push r1
+push r2
+ldi r0, uart_get_ctrl_reg_addr
+call r0
+// Get parameter from the stack
+// Set map of RAM addresses
+ldi r1, #2
+lsh r1, #28
+// Or'ing stack frame with the map
+or r1, r12
+// Parameter will have an offset r12 + 3
+ldi r2, #3
+add r2, r1
+// Load parameter's value to r1 register
+ld r1, r2
+// Store new value to i2c control register
+st r0, r1
+// return from function
+pop r2
+pop r1
+pop r0
+pop r12
+ret
+
+// Set data to "UART data output register"
+// Arguments:
+//	- The only argument is a data to save
+uart_set_data:
+push r12
+mov r12, r14
+push r0
+push r1
+push r2
+ldi r0, uart_get_data_output_reg_addr
+call r0
+// Get parameter from the stack
+// Set map of RAM addresses
+ldi r1, #2
+lsh r1, #28
+// Or'ing stack frame with the map
+or r1, r12
+// Parameter will have an offset r12 + 3
+ldi r2, #3
+add r1, r2
+// Load parameter's value to r2 register
+ld r2, r1
+// Store data to the register
+st r0, r2
+// Return from function
+pop r2
+pop r1
+pop r0
+pop r12
+ret
+
+// Returns UART Control Register's value
+uart_get_ctrl_reg_val:
+push r1
+ldi r0, uart_get_ctrl_reg_addr
+call r0
+mov r1, r0
+// Load data from address stored in register r1 to register r0
+ld r0, r1
+// return from function
+pop r1
+ret
+
+// Returns UART Status Register's value
+uart_get_status_reg_val:
+push r1
+ldi r0, uart_get_status_reg_addr
+call r0
+mov r1, r0
+// Load data from address stored in register r1 to register r0
+ld r0, r1
+pop r1
+ret
+
+// Return address of UART Control register (through r0 register)
+uart_get_ctrl_reg_addr:
+push r1
+ldi r1, #0x00
+push r1
+ldi r0, lldevcpu_get_periph_addr
+call r0
+pop r1
+// return from function
+pop r1
+ret
+
+// Return address of UART Data output register (through r0 register)
+uart_get_data_output_reg_addr:
+push r1
+ldi r1, #0x01
+push r1
+ldi r0, lldevcpu_get_periph_addr
+call r0
+pop r1
+// return from function
+pop r1
+ret
+
+// Return address of UART Status register (through r0 register)
+uart_get_status_reg_addr:
+push r1
+ldi r1, #0x03
+push r1
+ldi r0, lldevcpu_get_periph_addr
+call r0
+pop r1
+// return from function
+pop r1
+ret

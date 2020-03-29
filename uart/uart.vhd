@@ -25,9 +25,8 @@ architecture uart_arch of uart is
 	signal tx_clk_enable_s: boolean;
 	signal uart_baud_rate_s: baud_rate := 2_604;
 	signal uart_clk_s: std_logic := '0';
-	signal tx_data_s: data8;
 	signal tx_ready_s: boolean := true;
-	signal uat_ready_s: boolean;
+	signal uat_ready_s: boolean := true;
 	
 	alias tx_enable_a: std_ulogic is control_bits(uart_tx_enable_bit);
 	alias rx_enable_a: std_ulogic is control_bits(14);
@@ -46,24 +45,25 @@ begin
 	tx_ready <= tx_ready_s;
 	uart_tx_delay: uart_clk_divider port map(tx_clk_enable_s, clk, uart_baud_rate_s, uart_clk_s);
 
-	uat1: uat port map(uart_clk_s, tx_enable_s, tx_data_s, bit_out, uat_ready_s);
+	uat1: uat port map(uart_clk_s, tx_enable_s, tx_data, bit_out, uat_ready_s);
 	
 	transmit_proc: process(clk, tx_enable_a, tx_started_a, uat_ready_s)
 		variable tx_started_v: boolean;
 		variable tx_enable_v: boolean;
 		variable prev_tx_started_a_v: std_logic := '0';
 	begin
-		if(tx_enable_a = '1' and falling_edge(clk)) then						
-			if(uat_ready_s and not tx_started_v) then
-				tx_data_s <= tx_data;
-				tx_enable_v := true;				
-				tx_started_v := true;
-				tx_ready_s <= false;
-			elsif(not uat_ready_s) then
-				tx_enable_v := false;
-			elsif(not tx_enable_v and uat_ready_s and tx_started_v) then
-				tx_started_v := not (prev_tx_started_a_v = '0' and tx_started_a = '1');
-				tx_ready_s <= true;
+		if(tx_enable_a = '1' and falling_edge(clk)) then
+			if(tx_started_a = '1') then
+				if(uat_ready_s and not tx_started_v) then
+					tx_enable_v := true;				
+					tx_started_v := true;
+					tx_ready_s <= false;
+				elsif(not uat_ready_s) then
+					tx_enable_v := false;
+				elsif(not tx_enable_v and uat_ready_s and tx_started_v) then
+					tx_started_v := not (prev_tx_started_a_v = '0' and tx_started_a = '1');
+					tx_ready_s <= true;
+				end if;
 			end if;
 			
 			prev_tx_started_a_v := tx_started_a;
