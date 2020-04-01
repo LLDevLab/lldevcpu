@@ -165,10 +165,10 @@ pop r1
 pop r12
 ret
 
-// Return a 2'th complement value of a parameter
+// Return a 2's complement value of a parameter
 // Arguments:
 // - Value for getting 2'th complement 
-math_get_2th_complement:
+math_get_2s_complement:
 push r12
 mov r12, r14
 push r1
@@ -183,7 +183,7 @@ ldi r0, #3
 add r1, r0
 // Load parameter's value to r0 register
 ld r0, r1
-// Calculate 2'th complement
+// Calculate 2's complement
 ldi r1, #1
 not r0
 add r0, r1
