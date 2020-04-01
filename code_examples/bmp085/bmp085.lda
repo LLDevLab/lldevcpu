@@ -387,7 +387,7 @@ cmp r4, r0
 ldi r0, bmp085_calc_temperature_check_divider
 breq r0
 push r2
-ldi r0, math_get_2th_complement
+ldi r0, math_get_2s_complement
 call r0
 pop r2
 // Move the result to r2
@@ -399,7 +399,7 @@ cmp r5, r0
 ldi r0, bmp085_calc_temperature_x2
 breq r0
 push r3
-ldi r0, math_get_2th_complement
+ldi r0, math_get_2s_complement
 call r0
 pop r3
 mov r3, r0
@@ -431,7 +431,7 @@ ldi r0, bmp085_calc_temperature_b5
 brne r0
 // Otherwise convert the result to negative value
 push r2
-ldi r0, math_get_2th_complement
+ldi r0, math_get_2s_complement
 call r0
 pop r2
 mov r2, r0
